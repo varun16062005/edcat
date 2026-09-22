@@ -11,6 +11,7 @@ from fastapi import (
     File,
     Form,
     HTTPException,
+    Request,
     UploadFile,
 )
 from fastapi.middleware.cors import CORSMiddleware
@@ -24,6 +25,18 @@ BASE_DIR = Path(__file__).resolve().parent
 UPLOADS_DIR = BASE_DIR / "uploads"
 REPORTS_DIR = BASE_DIR / "reports"
 MAX_TOTAL_UPLOAD_SIZE = 500 * 1024 * 1024
+ALLOWED_ORIGINS = [
+    "https://ecdat1.netlify.app",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
+    *[
+        origin.strip().rstrip("/")
+        for origin in os.getenv("FRONTEND_ORIGINS", "").split(",")
+        if origin.strip()
+    ],
+]
 
 UPLOADS_DIR.mkdir(
     parents=True,
@@ -48,22 +61,26 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:5174",
-        "http://127.0.0.1:5174",
-        "https://ecdat1.netlify.app",
-        *[
-            origin.strip()
-            for origin in os.getenv("FRONTEND_ORIGINS", "").split(",")
-            if origin.strip()
-        ],
-    ],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def ensure_api_cors_headers(request: Request, call_next):
+    response = await call_next(request)
+    origin = request.headers.get("origin", "").rstrip("/")
+
+    if origin in ALLOWED_ORIGINS:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+
+    if request.url.path == "/scan":
+        response.headers["Cache-Control"] = "no-store"
+
+    return response
 
 
 def safe_zip_extract(
