@@ -698,7 +698,7 @@ function Home() {
           {/* QUICK METRICS */}
 
           <section className="home-stat-grid">
-            <div className="home-stat-card light">
+            <div className="home-stat-card">
               <div className="home-stat-top">
                 <span>Input</span>
 
