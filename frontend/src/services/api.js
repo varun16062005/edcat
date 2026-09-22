@@ -1,5 +1,5 @@
 const API_BASE_URL = (
-  import.meta.env.VITE_API_URL || ""
+  import.meta.env.VITE_API_URL || "/api"
 ).replace(/\/+$/, "");
 
 
@@ -11,12 +11,6 @@ export async function scanFile(scanInput) {
   if (!scanInput) {
     throw new Error(
       "No file selected."
-    );
-  }
-
-  if (!API_BASE_URL) {
-    throw new Error(
-      "The ECDAT API URL is not configured. Set VITE_API_URL before building the frontend."
     );
   }
 
