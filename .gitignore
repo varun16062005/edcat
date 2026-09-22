@@ -24,3 +24,13 @@ backend/reports/
 .DS_Store
 .vscode/
 .idea/
+
+# Python virtual environments
+backend/venv/
+venv/
+.venv/
+
+# Environment files
+.env
+.env.*
+!.env.example
