@@ -35,6 +35,9 @@ SOURCE_EXTENSIONS = {
     ".erl",
     ".fs",
     ".fsx",
+    ".html",
+    ".css",
+    ".md",
 }
 
 CONFIG_EXTENSIONS = {
@@ -49,6 +52,7 @@ CONFIG_EXTENSIONS = {
     ".xml",
     ".env",
     ".cnf",
+    ".env",
 }
 
 CERTIFICATE_KEY_EXTENSIONS = {

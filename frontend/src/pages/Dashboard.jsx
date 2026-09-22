@@ -22,7 +22,9 @@ import {
 } from "lucide-react";
 
 import {
+  Fragment,
   useMemo,
+  useEffect,
   useState,
 } from "react";
 
@@ -34,6 +36,11 @@ import {
 import {
   generatePdfReport,
 } from "../services/api";
+import GlobalSearch from "../components/GlobalSearch";
+import DependencyExplorer from "../components/DependencyExplorer";
+import QuantumEraScenario from "../components/QuantumEraScenario";
+import { useEcdatContext } from "../context/useEcdatContext";
+import { artifactEntityId, makeEntityId } from "../context/entityIds";
 
 
 const CURRENT_SCAN_KEY =
@@ -334,6 +341,48 @@ function formatDate(
   }
 }
 
+function displayFilePath(file) {
+  if (!file) return "Unknown file";
+  if (typeof file === "string") return file;
+  return file.path || file.name || "Unknown file";
+}
+
+function displayEntityName(value, fallback = "Selected entity") {
+  if (!value) return fallback;
+  if (typeof value === "string" || typeof value === "number") return value;
+  return value.name || value.path || fallback;
+}
+
+function extractRecommendationTargets(recommendation, targets) {
+  const source = [
+    ...(Array.isArray(targets) ? targets : []),
+    recommendation,
+  ]
+    .filter(Boolean)
+    .join(" ");
+  const ignoredTerms = new Set([
+    "AES",
+    "APPROVED",
+    "ALGORITHM",
+    "CURRENT",
+    "DES",
+    "ECC",
+    "HYBRID",
+    "KEM",
+    "MODERN",
+    "PQC",
+    "RECOMMENDED",
+    "REPLACE",
+    "SIGNATURE",
+    "SYMMETRIC",
+  ]);
+  const matches = source.match(/\b[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+\b|\b[A-Z]{2,}[0-9]{0,4}\b/g) || [];
+
+  return [...new Set(
+    matches.filter((match) => !ignoredTerms.has(match))
+  )];
+}
+
 
 /* ============================================================
    EXPORT
@@ -465,6 +514,33 @@ function buildEcdatCbom(
   };
 }
 
+function getCbomComponentValue(
+  component,
+  name,
+  fallback = "—"
+) {
+  if (
+    component?.[name] !== undefined &&
+    component?.[name] !== null &&
+    component?.[name] !== ""
+  ) {
+    return String(component[name]);
+  }
+
+  const property =
+    Array.isArray(component?.properties)
+      ? component.properties.find(
+          (item) => item?.name === name
+        )
+      : null;
+
+  return property?.value !== undefined &&
+    property?.value !== null &&
+    property?.value !== ""
+    ? String(property.value)
+    : fallback;
+}
+
 /* ============================================================
    SUMMARY CARD
    ============================================================ */
@@ -515,6 +591,12 @@ function Dashboard() {
 
   const location =
     useLocation();
+
+  const {
+    selectedContext,
+    selectContext,
+    clearContext,
+  } = useEcdatContext();
 
   /*
    * IMPORTANT:
@@ -569,10 +651,98 @@ function Dashboard() {
   ] = useState(null);
 
   const [
+    cbomSearchTerm,
+    setCbomSearchTerm,
+  ] = useState("");
+
+  const [
+    cbomCopied,
+    setCbomCopied,
+  ] = useState(false);
+
+  const [
     pdfLoading,
     setPdfLoading,
   ] = useState(false);
 
+
+  const [
+    analysisView,
+    setAnalysisView,
+  ] = useState("footprint");
+
+  useEffect(() => {
+    if (!selectedContext) {
+      return;
+    }
+
+    const syncTimer = window.setTimeout(() => {
+      if (
+        selectedContext.entityType === "history" &&
+        selectedContext.result
+      ) {
+        setScanResult(selectedContext.result);
+        setSearchTerm("");
+        setRiskFilter("ALL");
+        setTypeFilter("ALL");
+        setQuantumFilter("ALL");
+      }
+
+      if (
+        selectedContext.entityType === "artifact" ||
+        selectedContext.entityType === "algorithm"
+      ) {
+        setSearchTerm(
+          selectedContext.algorithm ||
+            selectedContext.name ||
+            ""
+        );
+        setRiskFilter("ALL");
+        setTypeFilter("ALL");
+        setQuantumFilter("ALL");
+      }
+
+      const target =
+        selectedContext.source === "cbom"
+          ? "cbom"
+          : selectedContext.source === "dependency"
+            ? "risk-analysis"
+          : selectedContext.entityType === "file"
+          ? "discovered-content"
+          : selectedContext.entityType === "history"
+            ? "dashboard-overview"
+            : selectedContext.entityType === "scan"
+              ? "dashboard-overview"
+            : selectedContext.entityType === "algorithm"
+              ? "risk-analysis"
+              : "inventory";
+
+      document
+        .getElementById(target)
+        ?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+    }, 0);
+
+    return () => window.clearTimeout(syncTimer);
+  }, [selectedContext]);
+
+  useEffect(() => {
+    if (!location.state?.scanResult) {
+      return undefined;
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: "auto",
+      });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [location.key, location.state?.scanResult]);
 
   /* ==========================================================
      DATA
@@ -601,6 +771,60 @@ function Dashboard() {
     () => scanResult?.artifacts || [],
     [scanResult]
   );
+
+  const dependencies = useMemo(
+    () => scanResult?.dependencies || {
+      nodes: [],
+      edges: [],
+      meta: {},
+    },
+    [scanResult]
+  );
+
+  const cbom = useMemo(
+    () => buildEcdatCbom(scanResult, artifacts),
+    [scanResult, artifacts]
+  );
+
+  const cbomComponents = useMemo(
+    () => (Array.isArray(cbom?.components) ? cbom.components : []),
+    [cbom]
+  );
+
+  const cbomJson = useMemo(
+    () => JSON.stringify(cbom, null, 2),
+    [cbom]
+  );
+
+  const filteredCbomComponents = useMemo(() => {
+    const query = cbomSearchTerm.trim().toLowerCase();
+
+    if (!query) {
+      return cbomComponents;
+    }
+
+    return cbomComponents.filter((component) => {
+      const properties = Array.isArray(component.properties)
+        ? component.properties
+            .map((property) => `${property.name || ""} ${property.value || ""}`)
+            .join(" ")
+        : "";
+      const searchable = [
+        component.name,
+        getCbomComponentValue(component, "file", ""),
+        getCbomComponentValue(component, "category", ""),
+        getCbomComponentValue(component, "risk", ""),
+        getCbomComponentValue(component, "quantum_status", ""),
+        getCbomComponentValue(component, "recommendation", ""),
+        properties,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return searchable.includes(query);
+    });
+  }, [cbomComponents, cbomSearchTerm]);
 
   const posture =
     summary.security_posture ||
@@ -695,7 +919,6 @@ function Dashboard() {
       );
     }, [artifacts]);
 
-
   /* ==========================================================
      FILTERED ARTIFACTS
      ========================================================== */
@@ -768,83 +991,52 @@ function Dashboard() {
      ========================================================== */
 
   const recommendations =
-    useMemo(() => {
-      const counts =
-        new Map();
-
-      artifacts.forEach(
-        (artifact) => {
-          const targets =
-            artifact.migration_targets ||
-            artifact
-              .recommendation_detail
-              ?.migration_targets ||
-            [];
-
-          targets.forEach(
-            (target) => {
-              counts.set(
-                target,
-                (
-                  counts.get(
-                    target
-                  ) || 0
-                ) + 1
+    useMemo(
+      () => {
+        return artifacts
+          .map((artifact, index) => {
+            const rawTargets =
+              artifact.migration_targets ||
+              artifact.recommendation_detail
+                ?.migration_targets ||
+              [];
+            const targets = Array.isArray(rawTargets)
+              ? rawTargets.filter(Boolean).map(String)
+              : rawTargets
+                ? [String(rawTargets)]
+                : [];
+            const recommendation =
+              typeof artifact.recommendation === "string"
+                ? artifact.recommendation.trim()
+                : "";
+            const risk = String(artifact.risk || "").toUpperCase();
+            const isActionable =
+              Boolean(recommendation || targets.length) &&
+              (
+                risk !== "LOW" ||
+                artifact.quantum_status === "VULNERABLE" ||
+                artifact.quantum_status === "LEGACY_WEAK"
               );
-            }
-          );
-        }
-      );
 
-      return [
-        ...counts.entries(),
-      ]
-        .map(
-          ([target, count]) => ({
-            target,
-            count,
+            return isActionable
+              ? {
+                  artifact,
+                  index,
+                  targets,
+                  recommendation,
+                }
+              : null;
           })
-        )
-        .sort(
-          (a, b) =>
-            b.count -
-            a.count
-        );
-    }, [artifacts]);
+          .filter(Boolean);
+      },
+      [artifacts]
+    );
 
-
-  /* ==========================================================
-     MOSCA COUNTS
-     ========================================================== */
-
-  const moscaCounts =
-    useMemo(() => {
-      const counts = {
-        ACTION_REQUIRED: 0,
-        PRIORITIZE: 0,
-        PLAN: 0,
-      };
-
-      artifacts.forEach(
-        (artifact) => {
-          const status =
-            artifact.mosca?.status;
-
-          if (
-            status &&
-            Object.prototype.hasOwnProperty.call(
-              counts,
-              status
-            )
-          ) {
-            counts[status] +=
-              1;
-          }
-        }
-      );
-
-      return counts;
-    }, [artifacts]);
+  const recommendationCount =
+    useMemo(
+      () => recommendations.length,
+      [recommendations]
+    );
 
 
   /* ==========================================================
@@ -878,6 +1070,20 @@ function Dashboard() {
       setScanResult(
         entry.result
       );
+
+      selectContext({
+        entityType: "scan",
+        entityId: makeEntityId(
+          "scan",
+          `${entry.result?.input?.source_type || entry.result?.input?.type || "scan"}:${entry.name}`
+        ),
+        name: entry.name,
+        sourceType: entry.result?.input?.source_type || "file",
+        projectName: entry.name,
+        fileCount: entry.result?.summary?.files_discovered || entry.result?.summary?.files_scanned || 0,
+        scannedFileCount: entry.result?.summary?.files_scanned || 0,
+        skippedFileCount: entry.result?.summary?.files_skipped || 0,
+      });
 
       sessionStorage.setItem(
         CURRENT_SCAN_KEY,
@@ -1010,21 +1216,33 @@ function Dashboard() {
      ========================================================== */
 
   const exportCBOM = () => {
-    const cbom =
-      buildEcdatCbom(
-        scanResult,
-        artifacts
-      );
-
     downloadFile(
-      JSON.stringify(
-        cbom,
-        null,
-        2
-      ),
+      cbomJson,
       "ecdat-cbom.json",
       "application/json"
     );
+  };
+
+  const copyCBOM = async () => {
+    if (
+      !artifacts.length ||
+      !navigator.clipboard?.writeText
+    ) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(
+        cbomJson
+      );
+      setCbomCopied(true);
+      window.setTimeout(
+        () => setCbomCopied(false),
+        1600
+      );
+    } catch {
+      setCbomCopied(false);
+    }
   };
 
 
@@ -1242,24 +1460,7 @@ function Dashboard() {
 
         <header className="dashboard-topbar">
 
-          <div className="dashboard-search">
-
-            <Search size={15} />
-
-            <input
-              value={searchTerm}
-              onChange={(
-                event
-              ) =>
-                setSearchTerm(
-                  event.target.value
-                )
-              }
-              placeholder="Search report"
-              aria-label="Search report"
-            />
-
-          </div>
+          <GlobalSearch variant="dashboard" />
 
 
           <div className="dashboard-title-mini">
@@ -1388,6 +1589,57 @@ function Dashboard() {
 
           </section>
 
+          {selectedContext && (
+            <div className="ecdat-context-indicator">
+              <div className="ecdat-context-label">
+                <span>CONTEXT</span>
+                <strong>
+                  {displayEntityName(selectedContext.name)}
+                </strong>
+              </div>
+
+              <div className="ecdat-context-detail">
+                {selectedContext.file && (
+                  <span>
+                    {displayFilePath(selectedContext.file)}
+                    {selectedContext.line
+                      ? ` : ${selectedContext.line}`
+                      : ""}
+                  </span>
+                )}
+
+                {selectedContext.entityType === "scan" && (
+                  <span>
+                    {selectedContext.sourceType || "scan"}
+                    {selectedContext.fileCount !== undefined
+                      ? ` · ${selectedContext.fileCount} files`
+                      : ""}
+                    {selectedContext.skippedFileCount
+                      ? ` · ${selectedContext.skippedFileCount} skipped`
+                      : ""}
+                  </span>
+                )}
+
+                {(selectedContext.risk ||
+                  selectedContext.quantumStatus) && (
+                  <span>
+                    {selectedContext.risk || "STATUS UNKNOWN"}
+                    {selectedContext.quantumStatus
+                      ? ` · ${selectedContext.quantumStatus.replaceAll("_", " ")}`
+                      : ""}
+                  </span>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={clearContext}
+              >
+                Clear context
+              </button>
+            </div>
+          )}
+
 
           {/* ==================================================
               FLOW
@@ -1455,7 +1707,7 @@ function Dashboard() {
               value={
                 summary.files_scanned
               }
-              description="Files scanned"
+              description={`${summary.files_skipped || 0} skipped · ${summary.files_discovered || summary.files_scanned || 0} discovered`}
               icon={
                 <FileCode2
                   size={16}
@@ -1526,8 +1778,7 @@ function Dashboard() {
             <DashboardSummary
               label="Recommendations"
               value={
-                summary.recommendations ||
-                0
+                recommendationCount
               }
               description="Findings with guidance"
               icon={
@@ -1637,6 +1888,9 @@ function Dashboard() {
             </div>
 
           </section>
+
+
+          <QuantumEraScenario artifacts={artifacts} />
 
 
           {/* ==================================================
@@ -1773,75 +2027,142 @@ function Dashboard() {
             </div>
 
 
-            <div className="cbom-summary-grid">
+            <div className="cbom-direct-layout">
 
-              <div>
-                <span>Cryptographic assets</span>
-                <strong>
-                  {summary.crypto_assets || 0}
-                </strong>
-              </div>
+              <div className="cbom-structured-column">
 
-              <div>
-                <span>Unique algorithms</span>
-                <strong>
-                  {algorithms.length}
-                </strong>
-              </div>
+                <div className="cbom-summary-grid">
 
-              <div>
-                <span>Source files</span>
-                <strong>
-                  {
-                    files.filter(
-                      (file) =>
-                        file.type ===
-                        "source-code"
-                    ).length
-                  }
-                </strong>
-              </div>
+                  <div>
+                    <span>CBOM format</span>
+                    <strong>{cbom.bomFormat || "ECDAT-CBOM"}</strong>
+                  </div>
 
-              <div>
-                <span>Priority findings</span>
-                <strong>
-                  {
-                    (summary.critical || 0) +
-                    (summary.high || 0)
-                  }
-                </strong>
-              </div>
+                  <div>
+                    <span>Specification</span>
+                    <strong>{cbom.specVersion || "1.0"}</strong>
+                  </div>
 
-            </div>
+                  <div>
+                    <span>Components</span>
+                    <strong>{cbomComponents.length}</strong>
+                  </div>
 
+                  <div>
+                    <span>Source</span>
+                    <strong>{cbom.metadata?.source || scanResult?.input?.name || "Current scan"}</strong>
+                  </div>
 
-            <div className="cbom-actions">
+                  <div>
+                    <span>Generated</span>
+                    <strong>{cbom.metadata?.timestamp ? formatDate(cbom.metadata.timestamp) : "Current scan"}</strong>
+                  </div>
 
-              <div className="cbom-format">
-                <span className="cbom-format-dot"></span>
-                <div>
-                  <strong>
-                    ECDAT CBOM JSON
-                  </strong>
-                  <small>
-                    Generated from the current scan result
-                  </small>
                 </div>
+
+
+                <div className="cbom-components-heading">
+
+                  <div>
+                    <span className="section-kicker">COMPONENT INVENTORY</span>
+                    <h3>Cryptographic components</h3>
+                  </div>
+
+                  <div className="inventory-search cbom-search">
+                    <Search size={14} />
+                    <input
+                      value={cbomSearchTerm}
+                      onChange={(event) => setCbomSearchTerm(event.target.value)}
+                      placeholder="Search CBOM"
+                      aria-label="Search CBOM"
+                    />
+                  </div>
+
+                </div>
+
+
+                {!artifacts.length ? (
+                  <div className="cbom-empty-state">
+                    <FileCode2 size={20} />
+                    <strong>No cryptographic assets detected.</strong>
+                  </div>
+                ) : (
+                  <div className="cbom-component-table-wrapper">
+                    <table className="cbom-component-table">
+                      <thead>
+                        <tr>
+                          <th>ALGORITHM</th>
+                          <th>CATEGORY</th>
+                          <th>FILE</th>
+                          <th>LINE</th>
+                          <th>RISK</th>
+                          <th>QUANTUM</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {!filteredCbomComponents.length ? (
+                          <tr>
+                            <td colSpan="6" className="empty-table">
+                              No matching CBOM components.
+                            </td>
+                          </tr>
+                        ) : (
+                          filteredCbomComponents.map((component, index) => {
+                            const risk = getCbomComponentValue(component, "risk", "UNKNOWN");
+                            const quantumStatus = getCbomComponentValue(component, "quantum_status", "UNKNOWN");
+
+                            return (
+                              <tr key={`${component["bom-ref"] || component.name || "component"}-${index}`}>
+                                <td><strong>{component.name || "Unknown"}</strong></td>
+                                <td>{getCbomComponentValue(component, "category")}</td>
+                                <td>{getCbomComponentValue(component, "file")}</td>
+                                <td>{getCbomComponentValue(component, "line")}</td>
+                                <td><span className={getRiskClass(risk)}>{risk}</span></td>
+                                <td><span className={getQuantumClass(quantumStatus)}>{getQuantumLabel(quantumStatus)}</span></td>
+                              </tr>
+                            );
+                          })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
               </div>
 
 
-              <button
-                className="dashboard-primary-button"
-                onClick={
-                  exportCBOM
-                }
-                disabled={
-                  !artifacts.length
-                }
-              >
-                <Download size={14} />
-                Extract CBOM
-              </button>
+              <div className="cbom-json-column">
+
+                <div className="cbom-json-header">
+                  <div>
+                    <span className="section-kicker">CBOM JSON</span>
+                    <strong>Generated CBOM preview</strong>
+                  </div>
+
+                  <div className="cbom-json-actions">
+                    <button
+                      type="button"
+                      className="dashboard-secondary-button"
+                      onClick={copyCBOM}
+                      disabled={!artifacts.length}
+                    >
+                      {cbomCopied ? "Copied" : "Copy JSON"}
+                    </button>
+                    <button
+                      type="button"
+                      className="dashboard-primary-button"
+                      onClick={exportCBOM}
+                      disabled={!artifacts.length}
+                    >
+                      <Download size={14} />
+                      Extract CBOM
+                    </button>
+                  </div>
+                </div>
+
+                <pre className="cbom-json-preview">{cbomJson}</pre>
+
+              </div>
 
             </div>
 
@@ -1885,6 +2206,40 @@ function Dashboard() {
 
             </div>
 
+
+            <div className="analysis-view-tabs" role="tablist" aria-label="Cryptographic analysis views">
+              <button
+                type="button"
+                className={analysisView === "footprint" ? "active" : ""}
+                onClick={() => setAnalysisView("footprint")}
+                role="tab"
+                aria-selected={analysisView === "footprint"}
+              >
+                Algorithm Footprint
+              </button>
+              <button
+                type="button"
+                className={analysisView === "graph" ? "active" : ""}
+                onClick={() => setAnalysisView("graph")}
+                role="tab"
+                aria-selected={analysisView === "graph"}
+              >
+                Dependency Graph
+              </button>
+              <button
+                type="button"
+                className={analysisView === "tree" ? "active" : ""}
+                onClick={() => setAnalysisView("tree")}
+                role="tab"
+                aria-selected={analysisView === "tree"}
+              >
+                Dependency Tree
+              </button>
+            </div>
+
+
+            {analysisView === "footprint" ? (
+              <>
 
             <div className="algorithm-footprint-chart">
 
@@ -2015,221 +2370,17 @@ function Dashboard() {
 
             </div>
 
-          </section>
-
-
-          {/* ==================================================
-              BUSINESS + MOSCA
-          ================================================== */}
-
-          <section className="dashboard-two-column migration-timing-only">
-
-            <div className="dashboard-card">
-
-              <div className="dashboard-card-header">
-
-                <div>
-
-                  <span className="section-kicker">
-                    MOSCA-STYLE ASSESSMENT
-                  </span>
-
-                  <h2>
-                    Migration timing
-                  </h2>
-
-                </div>
-
-              </div>
-
-
-              <div className="mosca-summary">
-
-                <div className="mosca-primary">
-
-                  <span>
-                    Planning horizon
-                  </span>
-
-                  <strong>
-                    {
-                      summary.planning_horizon_years ||
-                      10
-                    }{" "}
-                    yrs
-                  </strong>
-
-                </div>
-
-
-                <div className="mosca-status-grid">
-
-                  {moscaCounts.ACTION_REQUIRED > 0 && (
-                    <div>
-
-                      <span>
-                        Action required
-                      </span>
-
-                      <strong>
-                        {
-                          moscaCounts.ACTION_REQUIRED
-                        }
-                      </strong>
-
-                    </div>
-                  )}
-
-
-                  {moscaCounts.PRIORITIZE > 0 && (
-                    <div>
-
-                      <span>
-                        Prioritize
-                      </span>
-
-                      <strong>
-                        {
-                          moscaCounts.PRIORITIZE
-                        }
-                      </strong>
-
-                    </div>
-                  )}
-
-
-                  {moscaCounts.PLAN > 0 && (
-                    <div>
-
-                      <span>
-                        Plan
-                      </span>
-
-                      <strong>
-                        {
-                          moscaCounts.PLAN
-                        }
-                      </strong>
-
-                    </div>
-                  )}
-
-                </div>
-
-              </div>
-
-
-              <div className="mosca-note">
-                Data lifetime plus estimated
-                migration time is compared with
-                the configured planning horizon.
-              </div>
-
-            </div>
+              </>
+            ) : (
+              <DependencyExplorer
+                dependencies={dependencies}
+                artifacts={artifacts}
+                files={files}
+                view={analysisView}
+              />
+            )}
 
           </section>
-
-
-          {/* ==================================================
-              RECOMMENDATIONS
-          ================================================== */}
-
-          <section
-            className="dashboard-card recommendation-dashboard-card"
-            id="recommendations"
-          >
-
-            <div className="dashboard-card-header">
-
-              <div>
-
-                <span className="section-kicker">
-                  RECOMMENDATION ENGINE
-                </span>
-
-                <h2>
-                  PQC / hybrid migration guidance
-                </h2>
-
-              </div>
-
-
-              <div className="recommendation-mark">
-                <Lightbulb size={17} />
-              </div>
-
-            </div>
-
-
-            <div className="recommendation-main">
-
-              <div className="recommendation-main-icon">
-                <ShieldCheck size={21} />
-              </div>
-
-
-              <div>
-
-                <strong>
-                  Recommendations are generated
-                  per cryptographic finding.
-                </strong>
-
-                <p>
-                  Click an asset in the inventory to
-                  expand its inspection details inline,
-                  including the recommendation,
-                  evidence and exact source location.
-                </p>
-
-              </div>
-
-            </div>
-
-
-            <div className="recommendation-tags">
-
-              {(recommendations.length
-                ? recommendations
-                : [
-                    {
-                      target:
-                        "ML-DSA",
-                      count: 0,
-                    },
-                    {
-                      target:
-                        "ML-KEM",
-                      count: 0,
-                    },
-                    {
-                      target:
-                        "Hybrid",
-                      count: 0,
-                    },
-                  ]
-              )
-                .slice(0, 8)
-                .map(
-                  (item) => (
-                    <span
-                      key={
-                        item.target
-                      }
-                    >
-                      {item.target}
-
-                      {item.count
-                        ? ` · ${item.count}`
-                        : ""}
-                    </span>
-                  )
-                )}
-
-            </div>
-
-          </section>
-
 
           {/* ==================================================
               INVENTORY
@@ -2469,8 +2620,7 @@ function Dashboard() {
 
                     filteredArtifacts.map(
                       (
-                        artifact,
-                        filteredIndex
+                        artifact
                       ) => {
 
                         /*
@@ -2485,15 +2635,31 @@ function Dashboard() {
                           );
 
                         return (
-                          <>
+                          <Fragment
+                            key={artifactEntityId(
+                              artifact,
+                              originalIndex
+                            )}
+                          >
                           <tr
                             className={`inventory-row ${
                               expandedArtifactIndex ===
                               originalIndex
                                 ? "expanded"
                                 : ""
+                            } ${
+                              selectedContext?.entityId ===
+                              artifactEntityId(
+                                artifact,
+                                originalIndex
+                              )
+                                ? "context-selected"
+                                : ""
                             }`}
-                            key={`${artifact.file}-${artifact.line}-${artifact.algorithm}-${filteredIndex}`}
+                            key={artifactEntityId(
+                              artifact,
+                              originalIndex
+                            )}
                             onClick={() =>
                               setExpandedArtifactIndex(
                                 (
@@ -3098,7 +3264,7 @@ function Dashboard() {
                             </tr>
                           )}
 
-                          </>
+                          </Fragment>
                         );
                       }
                     )
@@ -3131,6 +3297,142 @@ function Dashboard() {
               {" "}findings
 
             </div>
+
+          </section>
+
+
+          {/* ==================================================
+              RECOMMENDATIONS
+          ================================================== */}
+
+          <section
+            className="dashboard-card recommendation-dashboard-card"
+            id="recommendations"
+          >
+
+            <div className="dashboard-card-header">
+
+              <div>
+
+                <span className="section-kicker">
+                  RECOMMENDATIONS
+                </span>
+
+                <h2>
+                  {recommendationCount}{" "}
+                  {recommendationCount === 1
+                    ? "file requires"
+                    : "files require"}{" "}
+                  attention
+                </h2>
+
+              </div>
+
+              <div className="recommendation-mark">
+                <Lightbulb size={17} />
+              </div>
+
+            </div>
+
+            {!recommendations.length ? (
+              <div className="recommendation-empty">
+                No actionable cryptographic recommendations were returned for this scan.
+              </div>
+            ) : (
+              <div className="recommendation-list">
+                {recommendations.map(
+                  ({
+                    artifact,
+                    index,
+                    targets,
+                    recommendation,
+                  }) => {
+                    const reason =
+                      artifact.quantum_status === "VULNERABLE"
+                        ? "Quantum vulnerable"
+                        : artifact.quantum_status === "LEGACY_WEAK"
+                          ? "Legacy / weak cryptography"
+                          : `${artifact.risk || "Risk"} cryptographic finding`;
+                    const location =
+                      artifact.line !== undefined &&
+                      artifact.line !== null &&
+                      artifact.line !== ""
+                        ? `${artifact.file || "Unknown file"}:${artifact.line}`
+                        : `${artifact.file || "Unknown file"} · Line unavailable`;
+                    const recommendedChange =
+                      extractRecommendationTargets(
+                        recommendation,
+                        targets
+                      );
+
+                    return (
+                      <article
+                        className="recommendation-row"
+                        key={artifactEntityId(artifact, index)}
+                      >
+                        <div className="recommendation-row-heading">
+                          <div>
+                            <strong className="recommendation-primary-name">
+                              {artifact.algorithm || artifact.category || "Cryptographic artifact"}
+                            </strong>
+                            <span>{location}</span>
+                          </div>
+
+                          <span className={getRiskClass(artifact.risk)}>
+                            {artifact.risk || "UNKNOWN"}
+                          </span>
+                        </div>
+
+                        <div className="recommendation-row-details">
+                          <div>
+                            <span>CURRENT</span>
+                            <strong className="recommendation-primary-name">
+                              {artifact.algorithm || "Unknown algorithm"}
+                            </strong>
+                          </div>
+                          <div>
+                            <span>ISSUE</span>
+                            <strong>{reason}</strong>
+                          </div>
+                          <div>
+                            <span>RECOMMENDED</span>
+                            <strong className="recommendation-primary-name">
+                              {recommendedChange.length
+                                ? recommendedChange.join(" · ")
+                                : "Modern approved symmetric replacement"}
+                            </strong>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          className="recommendation-view-button"
+                          onClick={() => {
+                            selectContext({
+                              entityType: "artifact",
+                              entityId: artifactEntityId(artifact, index),
+                              name: artifact.algorithm || artifact.category || "Cryptographic artifact",
+                              file: artifact.file,
+                              line: artifact.line,
+                              algorithm: artifact.algorithm,
+                              risk: artifact.risk,
+                              quantumStatus: artifact.quantum_status,
+                              category: artifact.category,
+                              artifact,
+                            });
+                            setExpandedArtifactIndex(index);
+                            scrollTo("inventory");
+                          }}
+                        >
+                          <Code2 size={13} />
+                          View File
+                        </button>
+                      </article>
+                    );
+                  }
+                )}
+              </div>
+            )}
 
           </section>
 
@@ -3228,7 +3530,8 @@ function Dashboard() {
                               : ""
                           }`}
                           key={
-                            entry.id
+                            entry.id ||
+                            `${entry.name || "scan"}-${entry.timestamp || "unknown"}`
                           }
                           onClick={() =>
                             loadHistoryEntry(
@@ -3256,6 +3559,14 @@ function Dashboard() {
                             }
                           </strong>
 
+                          <small className="history-source-type">
+                            {{
+                              folder: "Project",
+                              files: "Files",
+                              archive: "Archive",
+                              file: "File",
+                            }[result.input?.source_type] || "Scan"}
+                          </small>
 
                           <span>
                             {

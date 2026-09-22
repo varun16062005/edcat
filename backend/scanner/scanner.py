@@ -3,10 +3,28 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from .crypto_rules import CRYPTO_RULES
+from .dependencies import build_dependency_graph
 from .file_detector import detect_file_type
 
 
 MAX_TEXT_FILE_SIZE = 10 * 1024 * 1024
+
+IGNORED_DIRECTORIES = {
+    "node_modules",
+}
+
+SCANNABLE_FILE_TYPES = {
+    "source/code",
+    "configuration",
+    "certificate/key",
+    "container",
+}
+
+NON_TEXT_FILE_TYPES = {
+    "archive",
+    "library",
+    "binary/unknown",
+}
 
 
 def read_text_safely(
@@ -22,6 +40,34 @@ def read_text_safely(
         )
     except (OSError, UnicodeError):
         return None
+
+
+def is_probably_text_file(
+    file_path: Path,
+) -> bool:
+    try:
+        sample = file_path.read_bytes()[:64 * 1024]
+    except OSError:
+        return False
+
+    if b"\x00" in sample:
+        return False
+
+    try:
+        sample.decode("utf-8")
+        return True
+    except UnicodeDecodeError:
+        return False
+
+
+def is_scannable_file(
+    file_path: Path,
+    file_type: str,
+) -> bool:
+    if file_type in SCANNABLE_FILE_TYPES:
+        return True
+
+    return is_probably_text_file(file_path)
 
 
 def detect_pem_type(
@@ -262,6 +308,9 @@ def find_crypto_artifacts(
         real_crypto_artifacts
     )
 
+    if file_type == "archive":
+        return artifacts
+
     content = read_text_safely(
         file_path
     )
@@ -437,8 +486,22 @@ def create_summary(
             ),
         }
 
+    files_scanned = sum(
+        1
+        for item in files
+        if item.get("scan_status") == "scanned"
+    )
+
+    files_skipped = sum(
+        1
+        for item in files
+        if item.get("scan_status") == "skipped"
+    )
+
     return {
-        "files_scanned": len(files),
+        "files_discovered": len(files),
+        "files_scanned": files_scanned,
+        "files_skipped": files_skipped,
         "crypto_assets": len(artifacts),
         "critical": critical,
         "high": high,
@@ -452,25 +515,27 @@ def create_summary(
 
 def scan_directory(
     root_directory: Path,
+    project_name: str = "",
 ) -> Dict[str, Any]:
     files = []
     artifacts = []
 
-    for file_path in sorted(
-        root_directory.rglob("*")
-    ):
+    for file_path in sorted(root_directory.rglob("*")):
         if not file_path.is_file():
             continue
 
         try:
-            relative_path = (
-                file_path
-                .relative_to(
-                    root_directory
-                )
-                .as_posix()
-            )
+            relative_path = file_path.relative_to(root_directory).as_posix()
+        except ValueError:
+            continue
 
+        if any(
+            directory in IGNORED_DIRECTORIES
+            for directory in Path(relative_path).parts[:-1]
+        ):
+            continue
+
+        try:
             file_type = detect_file_type(
                 file_path
             )
@@ -480,14 +545,42 @@ def scan_directory(
         except OSError:
             continue
 
-        files.append(
-            {
-                "name": file_path.name,
-                "path": relative_path,
-                "type": file_type,
-                "size": size,
-            }
-        )
+        file_record = {
+            "name": file_path.name,
+            "path": relative_path,
+            "type": file_type,
+            "size": size,
+            "scan_status": "scanned",
+            "status": "scanned_text",
+        }
+
+        if file_type in NON_TEXT_FILE_TYPES and not is_probably_text_file(file_path):
+            file_record["scan_status"] = "skipped"
+            file_record["status"] = "binary_file"
+            file_record["skip_reason"] = "Binary or non-text file preserved without source analysis"
+            files.append(file_record)
+            continue
+
+        if size > MAX_TEXT_FILE_SIZE and file_type in {
+            "source/code",
+            "configuration",
+            "container",
+            "binary/unknown",
+        }:
+            file_record["scan_status"] = "skipped"
+            file_record["status"] = "unreadable_file"
+            file_record["skip_reason"] = "File too large"
+            files.append(file_record)
+            continue
+
+        if not is_scannable_file(file_path, file_type):
+            file_record["scan_status"] = "skipped"
+            file_record["status"] = "unreadable_file"
+            file_record["skip_reason"] = "File could not be decoded as readable text"
+            files.append(file_record)
+            continue
+
+        files.append(file_record)
 
         detected = find_crypto_artifacts(
             file_path=file_path,
@@ -505,4 +598,10 @@ def scan_directory(
         ),
         "files": files,
         "artifacts": artifacts,
+        "dependencies": build_dependency_graph(
+            root_directory=root_directory,
+            files=files,
+            artifacts=artifacts,
+            project_name=project_name,
+        ),
     }

@@ -1,5 +1,5 @@
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Activity,
   ArrowRight,
@@ -7,9 +7,14 @@ import {
   CircleHelp,
   FileArchive,
   FileCode2,
+  FileCheck2,
+  FileSearch,
+  FolderOpen,
   History,
+  KeyRound,
   LockKeyhole,
   Network,
+  ScanLine,
   Search,
   ShieldAlert,
   ShieldCheck,
@@ -24,6 +29,10 @@ import {
 } from "react-router-dom";
 
 import Dashboard from "./pages/Dashboard";
+import { EcdatProvider } from "./context/EcdatContext";
+import GlobalSearch from "./components/GlobalSearch";
+import { makeEntityId } from "./context/entityIds";
+import { useEcdatContext } from "./context/useEcdatContext";
 import { scanFile } from "./services/api";
 
 import "./App.css";
@@ -32,11 +41,209 @@ const HISTORY_KEY = "ecdatScanHistory";
 const CURRENT_SCAN_KEY = "ecdatScanResult";
 
 const SCAN_STAGES = [
-  "Uploading input",
-  "Discovering cryptographic assets",
+  "Preparing project input",
+  "Looking for cryptographic files",
+  "Analyzing algorithms and key material",
+  "Mapping dependencies and usage",
   "Assessing quantum exposure",
   "Preparing analysis report",
 ];
+
+const SCAN_ACTIVITY_STAGES = [
+  {
+    label: "Mapping project input",
+    detail: "Preparing the selected source and its folder structure",
+    Icon: FolderOpen,
+  },
+  {
+    label: "Looking for cryptographic files",
+    detail: "Checking source files, certificates, keys and configuration",
+    Icon: FileSearch,
+  },
+  {
+    label: "Analyzing algorithms and key material",
+    detail: "Tracing crypto calls and extracting detected artifacts",
+    Icon: ScanLine,
+  },
+  {
+    label: "Mapping dependencies and usage",
+    detail: "Connecting files, packages and cryptographic relationships",
+    Icon: Network,
+  },
+  {
+    label: "Assessing quantum exposure",
+    detail: "Comparing detected cryptography with quantum risk rules",
+    Icon: KeyRound,
+  },
+  {
+    label: "Preparing analysis report",
+    detail: "Organizing evidence, posture and recommendations",
+    Icon: FileCheck2,
+  },
+];
+
+const SCAN_ACTIVITY_MESSAGES = [
+  "Walking the selected project tree",
+  "Filtering ignored folders and generated files",
+  "Looking for hashes, ciphers and signatures",
+  "Checking certificates, keys and protocol references",
+  "Correlating findings with their source files",
+  "Building the cryptographic inventory",
+  "Calculating quantum-risk indicators",
+  "Organizing evidence for the dashboard",
+];
+
+const IGNORED_DIRECTORIES = new Set([
+  "node_modules",
+]);
+
+const SUPPORTED_EXTENSIONS = new Set([
+  ".py", ".js", ".jsx", ".ts", ".tsx", ".java", ".kt", ".kts",
+  ".go", ".rs", ".c", ".cpp", ".cc", ".h", ".hpp", ".cs", ".php",
+  ".rb", ".swift", ".m", ".mm", ".dart", ".scala", ".ex", ".exs",
+  ".erl", ".fs", ".fsx", ".html", ".css", ".json", ".yaml",
+  ".yml", ".xml", ".toml", ".ini", ".conf", ".cfg", ".properties",
+  ".env", ".cnf", ".sh", ".bash", ".sql", ".md", ".pem", ".crt", ".cer",
+  ".der", ".key", ".csr", ".p12", ".pfx", ".jks", ".p7b", ".p7c", ".zip", ".tar", ".gz", ".tgz",
+]);
+
+const MAX_TOTAL_UPLOAD_SIZE = 500 * 1024 * 1024;
+const MAX_TEXT_FILE_SIZE = 10 * 1024 * 1024;
+const ARCHIVE_EXTENSIONS = new Set([".zip", ".tar", ".gz", ".tgz", ".tar.gz"]);
+
+function getExtension(path) {
+  const normalized = String(path || "").toLowerCase();
+
+  if (normalized.endsWith(".env")) {
+    return ".env";
+  }
+
+  const dotIndex = normalized.lastIndexOf(".");
+  return dotIndex >= 0 ? normalized.slice(dotIndex) : "";
+}
+
+function formatBytes(bytes) {
+  const value = Number(bytes) || 0;
+  if (value < 1024) return `${value} B`;
+  if (value < 1024 ** 2) return `${(value / 1024).toFixed(1)} KB`;
+  if (value < 1024 ** 3) return `${(value / (1024 ** 2)).toFixed(1)} MB`;
+  return `${(value / (1024 ** 3)).toFixed(2)} GB`;
+}
+
+function isArchivePath(path) {
+  const normalized = String(path || "").toLowerCase();
+  return [...ARCHIVE_EXTENSIONS].some((extension) => normalized.endsWith(extension));
+}
+
+function isTextAnalysisCandidate(file, path) {
+  return !isArchivePath(path) && (
+    String(file?.type || "").startsWith("text/") ||
+    ![".der", ".key", ".p12", ".pfx", ".jks", ".p7b", ".p7c", ".pem", ".crt", ".cer"].includes(getExtension(path))
+  );
+}
+
+function safeRelativePath(path, fallback = "uploaded-file") {
+  const normalized = String(path || fallback).replaceAll("\\", "/");
+  const parts = normalized.split("/").filter((part) => part && part !== "." && part !== "..");
+  return parts.join("/") || fallback;
+}
+
+function isSupportedClientFile(file, relativePath) {
+  const lowerName = String(relativePath || file?.name || "").toLowerCase();
+
+  if (
+    lowerName.endsWith("/dockerfile") ||
+    lowerName.endsWith("/containerfile") ||
+    lowerName === "dockerfile" ||
+    lowerName === "containerfile"
+  ) {
+    return true;
+  }
+
+  return SUPPORTED_EXTENSIONS.has(getExtension(lowerName)) ||
+    String(file?.type || "").startsWith("text/") ||
+    ["application/json", "application/xml", "application/javascript"].includes(file?.type);
+}
+
+function normalizeFileEntry(file, relativePath) {
+  const path = safeRelativePath(relativePath || file?.name);
+  const tooLarge = Number(file?.size || 0) > MAX_TEXT_FILE_SIZE &&
+    isSupportedClientFile(file, path) &&
+    isTextAnalysisCandidate(file, path);
+
+  return {
+    file,
+    relativePath: path,
+    isSupported: isSupportedClientFile(file, path),
+    skipReason: tooLarge ? "Text file exceeds 10 MB analysis limit" : "",
+  };
+}
+
+function getFolderRoot(relativePaths) {
+  const firstPath = relativePaths.find(Boolean) || "";
+  return firstPath.split("/")[0];
+}
+
+function normalizeDirectoryFileList(fileList) {
+  const entries = Array.from(fileList || []);
+
+  return entries.map((file) => {
+    const originalPath = file.webkitRelativePath || file.name;
+    return normalizeFileEntry(file, originalPath);
+  });
+}
+
+async function readDirectoryEntries(directoryEntry, prefix = "") {
+  const reader = directoryEntry.createReader();
+  const entries = [];
+
+  while (true) {
+    const batch = await new Promise((resolve, reject) => reader.readEntries(resolve, reject));
+    if (!batch.length) break;
+    entries.push(...batch);
+  }
+
+  const files = [];
+  for (const entry of entries) {
+    if (entry.isDirectory) {
+      if (IGNORED_DIRECTORIES.has(entry.name)) continue;
+      files.push(...await readDirectoryEntries(entry, `${prefix}${entry.name}/`));
+      continue;
+    }
+
+    if (entry.isFile) {
+      const file = await new Promise((resolve, reject) => entry.file(resolve, reject));
+      files.push(normalizeFileEntry(file, `${prefix}${file.name}`));
+    }
+  }
+
+  return files;
+}
+
+async function collectDroppedEntries(dataTransfer) {
+  const items = Array.from(dataTransfer?.items || []);
+  const entries = items
+    .map((item) => item.webkitGetAsEntry?.())
+    .filter(Boolean);
+
+  if (!entries.length) {
+    return Array.from(dataTransfer?.files || []).map((file) => normalizeFileEntry(file));
+  }
+
+  const files = [];
+  for (const entry of entries) {
+    if (entry.isDirectory) {
+      if (!IGNORED_DIRECTORIES.has(entry.name)) {
+        files.push(...await readDirectoryEntries(entry));
+      }
+    } else if (entry.isFile) {
+      const file = await new Promise((resolve, reject) => entry.file(resolve, reject));
+      files.push(normalizeFileEntry(file));
+    }
+  }
+
+  return files;
+}
 
 function getHistory() {
   try {
@@ -84,22 +291,6 @@ function saveScanHistory(
   return entry;
 }
 
-function formatBytes(bytes) {
-  if (!bytes) {
-    return "0 B";
-  }
-
-  if (bytes < 1024) {
-    return `${bytes} B`;
-  }
-
-  if (bytes < 1024 * 1024) {
-    return `${(bytes / 1024).toFixed(1)} KB`;
-  }
-
-  return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
-}
-
 function sleep(ms) {
   return new Promise((resolve) =>
     setTimeout(resolve, ms)
@@ -108,11 +299,23 @@ function sleep(ms) {
 
 function Home() {
   const fileInputRef = useRef(null);
+  const folderInputRef = useRef(null);
   const stageTimerRef = useRef(null);
+  const activityTimerRef = useRef(null);
+
+  useEffect(() => () => {
+    if (stageTimerRef.current) {
+      clearInterval(stageTimerRef.current);
+    }
+    if (activityTimerRef.current) {
+      clearInterval(activityTimerRef.current);
+    }
+  }, []);
 
   const navigate = useNavigate();
+  const { selectContext } = useEcdatContext();
 
-  const [selectedFile, setSelectedFile] =
+  const [scanInput, setScanInput] =
     useState(null);
 
   const [isDragging, setIsDragging] =
@@ -124,39 +327,105 @@ function Home() {
   const [scanStage, setScanStage] =
     useState(0);
 
+  const [scanActivityIndex, setScanActivityIndex] =
+    useState(0);
+
   const [errorMessage, setErrorMessage] =
     useState("");
 
-  const handleFile = (file) => {
-    if (!file) {
+  const setSelectedInput = (entries, sourceType, projectName = "") => {
+    if (!entries.length && sourceType !== "folder") {
       return;
     }
 
-    setSelectedFile(file);
+    const firstFile = entries[0]?.file;
+    const inferredSourceType = sourceType || (
+      entries.length > 1
+        ? "files"
+        : getExtension(firstFile?.name) === ".zip"
+          ? "archive"
+          : "file"
+    );
+    const totalBytes = entries.reduce((total, entry) => total + Number(entry.file?.size || 0), 0);
+    if (totalBytes > MAX_TOTAL_UPLOAD_SIZE) {
+      setScanInput(null);
+      setErrorMessage("Upload exceeds the ECDAT project size limit of 500 MB.");
+      return;
+    }
+
+    setScanInput({
+      sourceType: inferredSourceType,
+      files: entries,
+      displayName: projectName || firstFile?.name || "Selected project",
+      totalFiles: entries.length,
+      totalBytes,
+    });
     setErrorMessage("");
   };
 
   const handleInputChange = (event) => {
-    handleFile(event.target.files?.[0]);
+    const files = Array.from(event.target.files || []);
+    const hasDirectoryPaths = files.some((file) => file.webkitRelativePath);
+    const entries = hasDirectoryPaths
+      ? normalizeDirectoryFileList(files)
+      : files.map((file) => normalizeFileEntry(file));
+    setSelectedInput(
+      entries,
+      hasDirectoryPaths ? "folder" : entries.length > 1 ? "files" : undefined,
+      files.length > 1 ? `${files.length} selected files` : files[0]?.name
+    );
+    event.target.value = "";
   };
 
-  const handleDrop = (event) => {
+  const handleFolderInputChange = (event) => {
+    const files = Array.from(event.target.files || []);
+    const entries = files.map((file) => normalizeFileEntry(
+      file,
+      file.webkitRelativePath || file.name
+    ));
+    const root = getFolderRoot(files.map((file) => file.webkitRelativePath));
+    setSelectedInput(entries, "folder", root || "Selected folder");
+    event.target.value = "";
+  };
+
+  const handleDrop = async (event) => {
     event.preventDefault();
 
     setIsDragging(false);
 
-    handleFile(
-      event.dataTransfer.files?.[0]
-    );
+    try {
+      const entries = await collectDroppedEntries(event.dataTransfer);
+      const firstFile = entries[0]?.file;
+      const hasDirectory = Array.from(event.dataTransfer?.items || [])
+        .some((item) => item.webkitGetAsEntry?.()?.isDirectory);
+      const sourceType = hasDirectory
+        ? "folder"
+        : entries.length > 1
+          ? "files"
+        : getExtension(firstFile?.name) === ".zip"
+          ? "archive"
+          : "file";
+      setSelectedInput(
+        entries,
+        sourceType,
+        sourceType === "folder"
+          ? "Dropped project"
+          : firstFile?.name
+      );
+    } catch {
+      setErrorMessage("Unable to read the dropped files. Please try selecting them instead.");
+    }
   };
 
   const startStageAnimation = () => {
     setScanStage(0);
-
+    setScanActivityIndex(0);
     if (stageTimerRef.current) {
       clearInterval(stageTimerRef.current);
     }
-
+    if (activityTimerRef.current) {
+      clearInterval(activityTimerRef.current);
+    }
     stageTimerRef.current =
       setInterval(() => {
         setScanStage((current) => {
@@ -169,7 +438,14 @@ function Home() {
 
           return current + 1;
         });
-      }, 750);
+      }, 1250);
+
+    activityTimerRef.current =
+      setInterval(() => {
+        setScanActivityIndex((current) => (
+          (current + 1) % SCAN_ACTIVITY_MESSAGES.length
+        ));
+      }, 850);
   };
 
   const stopStageAnimation = () => {
@@ -177,10 +453,14 @@ function Home() {
       clearInterval(stageTimerRef.current);
       stageTimerRef.current = null;
     }
+    if (activityTimerRef.current) {
+      clearInterval(activityTimerRef.current);
+      activityTimerRef.current = null;
+    }
   };
 
   const startScan = async () => {
-    if (!selectedFile || isScanning) {
+    if (!scanInput || isScanning) {
       return;
     }
 
@@ -189,12 +469,12 @@ function Home() {
 
     startStageAnimation();
 
-    const minimumDisplayTime = 3000;
+    const minimumDisplayTime = 7600;
     const startedAt = Date.now();
 
     try {
       const result = await Promise.all([
-        scanFile(selectedFile),
+        scanFile(scanInput),
         sleep(minimumDisplayTime),
       ]).then(([scanResult]) => scanResult);
 
@@ -213,9 +493,23 @@ function Home() {
         JSON.stringify(result)
       );
 
+      selectContext({
+        entityType: "scan",
+        entityId: makeEntityId(
+          "scan",
+          `${result.input?.source_type || scanInput.sourceType}:${result.input?.name || scanInput.displayName}`
+        ),
+        name: result.input?.name || scanInput.displayName,
+        sourceType: result.input?.source_type || scanInput.sourceType,
+        projectName: result.input?.name || scanInput.displayName,
+        fileCount: result.summary?.files_discovered || scanInput.files.length,
+        scannedFileCount: result.summary?.files_scanned || 0,
+        skippedFileCount: result.summary?.files_skipped || 0,
+      });
+
       saveScanHistory(
         result,
-        selectedFile.name
+        scanInput.displayName
       );
 
       stopStageAnimation();
@@ -246,12 +540,13 @@ function Home() {
       return;
     }
 
-    setSelectedFile(null);
+    setScanInput(null);
     setErrorMessage("");
 
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+
   };
 
   const scrollToAbout = () => {
@@ -323,14 +618,7 @@ function Home() {
 
       <main className="main-workspace">
         <header className="home-topbar">
-          <div className="home-search">
-            <Search size={16} />
-
-            <input
-              placeholder="Search ECDAT"
-              aria-label="Search ECDAT"
-            />
-          </div>
+          <GlobalSearch variant="home" />
 
           <div className="workspace-label">
             Cryptographic Discovery & Assessment
@@ -494,7 +782,7 @@ function Home() {
                     ? "dragging"
                     : ""
                 } ${
-                  selectedFile
+                  scanInput
                     ? "selected"
                     : ""
                 }`}
@@ -512,61 +800,97 @@ function Home() {
                 }}
                 onDrop={handleDrop}
               >
-                {!selectedFile ? (
+                {!scanInput ? (
                   <>
                     <div className="upload-circle">
                       <Upload size={25} />
                     </div>
 
                     <h3>
-                      Drag your file or project here
+                      {isDragging ? "DROP TO SCAN" : "DROP FILES, FOLDERS OR ARCHIVES HERE"}
                     </h3>
 
                     <p>
-                      ECDAT accepts source code,
-                      binaries, libraries,
-                      certificates, configurations,
-                      container artefacts and archives.
+                      Source code • configuration • keys/certificates • archives
                     </p>
 
-                    <button
-                      className="upload-button"
-                      onClick={() =>
-                        fileInputRef.current?.click()
-                      }
-                    >
-                      <Upload size={15} />
-                      Upload
-                    </button>
+                    <div className="upload-choice-actions">
+                      <button
+                        className="upload-button"
+                        onClick={() => fileInputRef.current?.click()}
+                        onDoubleClick={() => folderInputRef.current?.click()}
+                        title="Click to select files. Double-click to select a folder."
+                      >
+                        <Upload size={15} />
+                        Upload / Select
+                      </button>
+                    </div>
 
                     <input
                       ref={fileInputRef}
                       type="file"
+                      multiple
                       onChange={handleInputChange}
                       hidden
                     />
 
+                    <input
+                      ref={folderInputRef}
+                      type="file"
+                      multiple
+                      webkitdirectory=""
+                      directory=""
+                      onChange={handleFolderInputChange}
+                      hidden
+                    />
+
                     <span className="upload-helper">
-                      ECDAT automatically identifies
-                      the input type
+                      Drag a folder to preserve its relative paths. Generated directories are skipped:
+                      node_modules, .git, dist, build, coverage, __pycache__, .venv, venv and target.
                     </span>
                   </>
                 ) : (
                   <>
                     <div className="upload-circle selected">
-                      <FileArchive size={25} />
+                      {scanInput.sourceType === "folder" || scanInput.sourceType === "files" ? (
+                        <FileCode2 size={25} />
+                      ) : (
+                        <FileArchive size={25} />
+                      )}
                     </div>
 
                     <h3 className="selected-name">
-                      {selectedFile.name}
+                      {scanInput.displayName}
                     </h3>
 
-                    <p>
-                      {formatBytes(
-                        selectedFile.size
-                      )}{" "}
-                      · Ready for analysis
-                    </p>
+                    <div className="upload-input-summary">
+                      <span>
+                        Project / Upload <strong>{scanInput.displayName}</strong>
+                      </span>
+                      <span>
+                        Files discovered <strong>{scanInput.totalFiles}</strong>
+                      </span>
+                      <span>
+                        Total size <strong>{formatBytes(scanInput.totalBytes)}</strong>
+                      </span>
+                      <span>
+                        Supported for analysis <strong>{scanInput.files.filter((entry) => entry.isSupported && !entry.skipReason).length}</strong>
+                      </span>
+                      <span>
+                        Skipped <strong>{scanInput.files.filter((entry) => entry.skipReason || !entry.isSupported).length}</strong>
+                      </span>
+                    </div>
+
+                    {scanInput.files.length > 0 && scanInput.files.length <= 8 && (
+                      <div className="upload-file-list">
+                        {scanInput.files.map((entry) => (
+                          <span key={entry.relativePath}>
+                            {entry.relativePath}
+                            {(entry.skipReason || !entry.isSupported) && " · skipped"}
+                          </span>
+                        ))}
+                      </div>
+                    )}
 
                     <div className="selected-actions">
                       <button
@@ -587,13 +911,8 @@ function Home() {
                         )}
                       </button>
 
-                      <button
-                        className="remove-button"
-                        onClick={removeFile}
-                        disabled={isScanning}
-                      >
-                        <X size={15} />
-                        Remove
+                      <button className="remove-button" onClick={removeFile} disabled={isScanning}>
+                        <X size={15} /> Change upload
                       </button>
                     </div>
                   </>
@@ -732,10 +1051,7 @@ function Home() {
         <div className="scan-processing-overlay">
           <div className="scan-processing-card">
             <div className="scan-processing-logo">
-              <img
-                src="/ecdat-logo.png"
-                alt="ECDAT"
-              />
+              <img src="/ecdat-logo.png" alt="ECDAT" />
             </div>
 
             <span className="section-kicker">
@@ -747,10 +1063,54 @@ function Home() {
             </h2>
 
             <p>
-              The project is being inspected for
-              cryptographic artefacts and quantum-risk
-              indicators.
+              The project is being inspected for cryptographic artefacts and quantum-risk indicators.
             </p>
+
+            {(() => {
+              const activity = SCAN_ACTIVITY_STAGES[scanStage] || SCAN_ACTIVITY_STAGES[0];
+              const ActivityIcon = activity.Icon;
+              const discoveredCount = scanInput?.files?.length || 0;
+              const activityMessage = SCAN_ACTIVITY_MESSAGES[scanActivityIndex];
+
+              return (
+                <div className={`scan-activity-panel scan-activity-stage-${scanStage}`} aria-live="polite">
+                  <div className="scan-activity-heading">
+                    <div className="scan-activity-heading-icon"><ScanLine size={17} /></div>
+                    <div>
+                      <strong>{activity.label}</strong>
+                      <span>{activity.detail}</span>
+                    </div>
+                    <small>{discoveredCount} input {discoveredCount === 1 ? "file" : "files"}</small>
+                  </div>
+                  <div className="scan-activity-live" aria-live="polite">
+                    <span className="scan-activity-live-dot" />
+                    <span>{activityMessage}</span>
+                  </div>
+                  <div className="scan-activity-flow">
+                    <div className="scan-activity-source">
+                      <FolderOpen size={20} />
+                      <span>{scanInput?.sourceType === "folder" ? "Project" : "Input"}</span>
+                    </div>
+                    <div className="scan-activity-arrow" aria-hidden="true" />
+                    <div className="scan-activity-files" aria-label="Animated file scanning illustration">
+                      {["project/", "src/", "crypto/"].map((name, index) => (
+                        <div className={`scan-activity-file scan-file-state-${(index + scanStage) % 3}`} key={name}>
+                          <FileCode2 size={12} />
+                          <span>{name}</span>
+                          <i />
+                        </div>
+                      ))}
+                      <div className="scan-activity-scan-line" />
+                    </div>
+                    <div className="scan-activity-arrow" aria-hidden="true" />
+                    <div className={`scan-activity-destination scan-activity-destination-${scanStage}`}>
+                      <ActivityIcon size={20} />
+                      <span>{scanStage === 4 ? "Risk" : scanStage === 5 ? "Report" : scanStage === 2 ? "Crypto" : scanStage === 3 ? "Links" : "Scan"}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
 
             <div className="scan-progress">
               <div className="scan-progress-track">
@@ -765,14 +1125,8 @@ function Home() {
                   }}
                 />
               </div>
-
               <div className="scan-progress-value">
-                {Math.round(
-                  ((scanStage + 1) /
-                    SCAN_STAGES.length) *
-                    100
-                )}
-                %
+                {Math.round(((scanStage + 1) / SCAN_STAGES.length) * 100)}%
               </div>
             </div>
 
@@ -881,17 +1235,19 @@ function DiscoveryType({
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route
-          path="/"
-          element={<Home />}
-        />
+      <EcdatProvider>
+        <Routes>
+          <Route
+            path="/"
+            element={<Home />}
+          />
 
-        <Route
-          path="/dashboard"
-          element={<Dashboard />}
-        />
-      </Routes>
+          <Route
+            path="/dashboard"
+            element={<Dashboard />}
+          />
+        </Routes>
+      </EcdatProvider>
     </BrowserRouter>
   );
 }

@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+dist/
+build/
+
+# Local/project data
+uploads/
+backend/uploads/
+reports/
+backend/reports/
+
+# OS/editor
+.DS_Store
+.vscode/
+.idea/

@@ -1,13 +1,15 @@
-const API_BASE_URL =
-  "http://127.0.0.1:8000";
+const API_BASE_URL = (
+  import.meta.env.VITE_API_URL ||
+  "http://127.0.0.1:8000"
+).replace(/\/+$/, "");
 
 
 /* ============================================================
    SCAN FILE
    ============================================================ */
 
-export async function scanFile(file) {
-  if (!file) {
+export async function scanFile(scanInput) {
+  if (!scanInput) {
     throw new Error(
       "No file selected."
     );
@@ -16,10 +18,43 @@ export async function scanFile(file) {
   const formData =
     new FormData();
 
-  formData.append(
-    "file",
-    file
-  );
+  const input = typeof File !== "undefined" && scanInput instanceof File
+    ? {
+        sourceType: "file",
+        projectName: scanInput.name,
+        files: [{ file: scanInput, relativePath: scanInput.name }],
+      }
+    : scanInput;
+
+  const manifest = (input.files || []).map((entry) => ({
+    path: entry.relativePath || entry.file?.name || "unknown",
+    name: entry.file?.name || "unknown",
+    size: entry.file?.size || 0,
+    type: entry.file?.type || "",
+    client_skip_reason: entry.skipReason || "",
+  }));
+
+  (input.files || []).forEach((entry) => {
+    if (entry.skipReason) return;
+
+    formData.append(
+      "files",
+      entry.file,
+      entry.file.name
+    );
+  });
+
+  const relativePaths = (input.files || [])
+    .filter((entry) => !entry.skipReason)
+    .map((entry) => entry.relativePath || entry.file?.name || "unknown");
+
+  relativePaths.forEach((path) => {
+    formData.append("relative_paths", path);
+  });
+
+  formData.append("source_type", input.sourceType || "file");
+  formData.append("project_name", input.projectName || "Selected project");
+  formData.append("manifest", JSON.stringify(manifest));
 
   let response;
 

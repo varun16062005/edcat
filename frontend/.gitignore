@@ -1,23 +1,5 @@
-cat > .gitignore <<'EOF'
-# Python
-__pycache__/
-*.py[cod]
-.venv/
-venv/
-.env
-
-# Node
 node_modules/
 dist/
-
-# Local/project data
-uploads/*
-backend/uploads/*
-reports/*
-backend/reports/*
-
-# OS/editor
-.DS_Store
-.vscode/
-.idea/
-EOF
+.env
+.env.*
+!.env.example

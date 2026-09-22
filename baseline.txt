@@ -1,13 +1,10 @@
+===== frontend/src/App.css =====
 /* =========================================================
    ECDAT GLOBAL
    ========================================================= */
 
 * {
   box-sizing: border-box;
-}
-
-html {
-  font-size: 16px;
 }
 
 html,
@@ -19,7 +16,6 @@ body,
 
 body {
   margin: 0;
-  font-size: 16px;
   background: #191919;
   color: #f4f4f5;
   font-family:
@@ -57,7 +53,7 @@ button:disabled {
   display: block;
   margin-bottom: 8px;
   color: #68686d;
-  font-size: 13px;
+  font-size: 8px;
   line-height: 1;
   letter-spacing: 0.13em;
   font-weight: 700;
@@ -200,7 +196,7 @@ button:disabled {
   outline: 0;
   background: transparent;
   color: #eeeeef;
-  font-size: 16px;
+  font-size: 11px;
 }
 
 .home-search input::placeholder {
@@ -209,7 +205,7 @@ button:disabled {
 
 .workspace-label {
   color: #d2d2d5;
-  font-size: 16px;
+  font-size: 11px;
   font-weight: 600;
 }
 
@@ -246,7 +242,7 @@ button:disabled {
   align-items: center;
   gap: 7px;
   color: #6e6e73;
-  font-size: 13px;
+  font-size: 8px;
   font-weight: 700;
   letter-spacing: 0.13em;
   margin-bottom: 17px;
@@ -275,7 +271,7 @@ button:disabled {
   max-width: 625px;
   margin: 23px 0 0;
   color: #7c7c83;
-  font-size: 16px;
+  font-size: 12px;
   line-height: 1.7;
 }
 
@@ -292,7 +288,7 @@ button:disabled {
   height: 39px;
   border-radius: 11px;
   padding: 0 15px;
-  font-size: 16px;
+  font-size: 10px;
   font-weight: 600;
 }
 
@@ -379,7 +375,7 @@ button:disabled {
   align-items: center;
   gap: 7px;
   color: #a6a6ab;
-  font-size: 13px;
+  font-size: 8px;
 }
 
 .hero-floating-card svg {
@@ -433,7 +429,7 @@ button:disabled {
   justify-content: space-between;
   align-items: flex-start;
   color: #818186;
-  font-size: 14px;
+  font-size: 9px;
 }
 
 .home-stat-card.light .home-stat-top {
@@ -464,7 +460,7 @@ button:disabled {
 .home-stat-card small {
   max-width: 300px;
   color: #68686d;
-  font-size: 14px;
+  font-size: 9px;
   line-height: 1.45;
 }
 
@@ -509,7 +505,7 @@ button:disabled {
 .section-heading-row p {
   margin: 7px 0 0;
   color: #6d6d72;
-  font-size: 16px;
+  font-size: 10px;
   line-height: 1.5;
 }
 
@@ -581,7 +577,7 @@ button:disabled {
   max-width: 500px;
   margin: 9px 0 16px;
   color: #707076;
-  font-size: 16px;
+  font-size: 10px;
   line-height: 1.6;
 }
 
@@ -595,70 +591,13 @@ button:disabled {
   align-items: center;
   justify-content: center;
   gap: 7px;
-  font-size: 16px;
+  font-size: 10px;
   font-weight: 600;
   cursor: pointer;
 }
 
 .upload-button:hover:not(:disabled) {
   background: #fff;
-}
-
-.upload-choice-actions {
-  position: relative;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-}
-
-.upload-button.secondary {
-  background: #30353d;
-  color: #d8e2ed;
-  border: 1px solid #4a5360;
-}
-
-.upload-button.secondary:hover:not(:disabled) {
-  background: #3a424d;
-}
-
-.upload-input-summary {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-  margin: 0 0 15px;
-}
-
-.upload-input-summary span,
-.upload-file-list span {
-  padding: 6px 8px;
-  border: 1px solid #36383d;
-  border-radius: 7px;
-  color: #85858b;
-  font-size: 14px;
-}
-
-.upload-input-summary strong {
-  color: #d7d7da;
-}
-
-.upload-file-list {
-  max-width: min(560px, 100%);
-  max-height: 80px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 5px;
-  overflow: auto;
-  margin: 0 0 15px;
-}
-
-.upload-file-list span {
-  padding: 4px 6px;
-  color: #7293a6;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 13px;
 }
 
 .remove-button {
@@ -671,7 +610,7 @@ button:disabled {
   align-items: center;
   justify-content: center;
   gap: 7px;
-  font-size: 16px;
+  font-size: 10px;
   cursor: pointer;
 }
 
@@ -689,7 +628,7 @@ button:disabled {
 .upload-helper {
   margin-top: 14px;
   color: #5f5f64;
-  font-size: 13px;
+  font-size: 8px;
 }
 
 .upload-error {
@@ -702,7 +641,7 @@ button:disabled {
   display: flex;
   gap: 7px;
   align-items: center;
-  font-size: 14px;
+  font-size: 9px;
 }
 
 .mini-spinner {
@@ -746,7 +685,7 @@ button:disabled {
 
 .workflow-number {
   color: #626267;
-  font-size: 13px;
+  font-size: 8px;
   font-weight: 700;
 }
 
@@ -763,14 +702,14 @@ button:disabled {
 .workflow-text strong {
   display: block;
   color: #dddde0;
-  font-size: 16px;
+  font-size: 11px;
 }
 
 .workflow-text span {
   display: block;
   margin-top: 4px;
   color: #67676c;
-  font-size: 13px;
+  font-size: 8px;
   line-height: 1.4;
 }
 
@@ -805,7 +744,7 @@ button:disabled {
 .discovery-heading p {
   max-width: 510px;
   color: #727277;
-  font-size: 16px;
+  font-size: 10px;
   line-height: 1.6;
   margin: 0;
 }
@@ -842,14 +781,14 @@ button:disabled {
 .discovery-type-card strong {
   display: block;
   color: #dcdcdf;
-  font-size: 16px;
+  font-size: 10px;
 }
 
 .discovery-type-card span {
   display: block;
   margin-top: 5px;
   color: #68686d;
-  font-size: 13px;
+  font-size: 8px;
   line-height: 1.45;
 }
 
@@ -879,9 +818,16 @@ button:disabled {
   width: min(540px, 100%);
   padding: 30px;
   border-radius: 23px;
-  background: #202021;
+  background:
+    radial-gradient(
+      circle at 90% 0%,
+      rgba(74, 104, 184, 0.15),
+      transparent 35%
+    ),
+    #202021;
   border: 1px solid #36363a;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.42);
+  box-shadow:
+    0 25px 90px rgba(0, 0, 0, 0.48);
 }
 
 .scan-processing-logo {
@@ -913,7 +859,7 @@ button:disabled {
   max-width: 460px;
   margin: 9px 0 22px;
   color: #74747a;
-  font-size: 16px;
+  font-size: 10px;
   line-height: 1.6;
 }
 
@@ -942,7 +888,7 @@ button:disabled {
   width: 34px;
   text-align: right;
   color: #c9c9cc;
-  font-size: 13px;
+  font-size: 8px;
 }
 
 .scan-stage-list {
@@ -961,7 +907,7 @@ button:disabled {
   border-radius: 9px;
   background: #1a1a1b;
   color: #66666c;
-  font-size: 13px;
+  font-size: 8px;
 }
 
 .scan-stage-dot {
@@ -971,7 +917,7 @@ button:disabled {
   background: #29292b;
   display: grid;
   place-items: center;
-  font-size: 13px;
+  font-size: 7px;
   color: #66666b;
   flex-shrink: 0;
 }
@@ -994,191 +940,6 @@ button:disabled {
   background: #294233;
   color: #85d6a9;
 }
-
-/* Animated detail panel used during the existing scan lifecycle. */
-.scan-activity-panel {
-  margin: 16px 0 18px;
-  padding: 13px;
-  border: 1px solid #2f4057;
-  border-radius: 11px;
-  background: #111a27;
-}
-
-.scan-activity-heading,
-.scan-activity-flow,
-.scan-activity-file {
-  display: flex;
-  align-items: center;
-}
-
-.scan-activity-heading {
-  gap: 9px;
-}
-
-.scan-activity-heading-icon {
-  width: 30px;
-  height: 30px;
-  display: grid;
-  flex: 0 0 30px;
-  place-items: center;
-  border: 1px solid #3b5d91;
-  border-radius: 8px;
-  background: #1b3155;
-  color: #a3c1ff;
-  animation: scanActivityPulse 1.7s ease-in-out infinite;
-}
-
-.scan-activity-heading > div:nth-child(2) {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.scan-activity-heading strong { color: #dae5f6; font-size: 16px; }
-.scan-activity-heading span { color: #7d8da5; font-size: 13px; }
-.scan-activity-heading small {
-  margin-left: auto;
-  color: #7592c9;
-  font-size: 13px;
-  white-space: nowrap;
-}
-
-.scan-activity-live {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 20px;
-  margin-top: 10px;
-  padding: 5px 7px;
-  border: 1px solid #263a55;
-  border-radius: 5px;
-  background: #0d1725;
-  color: #9bb8e8;
-  font-size: 13px;
-}
-
-.scan-activity-live-dot {
-  width: 6px;
-  height: 6px;
-  flex: 0 0 6px;
-  border-radius: 50%;
-  background: #70d6aa;
-  animation: scanActivityLivePulse 1.1s ease-in-out infinite;
-}
-
-.scan-activity-flow { gap: 9px; margin-top: 14px; }
-.scan-activity-source,
-.scan-activity-destination {
-  min-width: 58px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  color: #9ab1d9;
-  font-size: 13px;
-  text-align: center;
-}
-
-.scan-activity-source svg,
-.scan-activity-destination svg { color: #86aaf1; }
-.scan-activity-destination-2 svg { color: #f0bc76; }
-.scan-activity-destination-3 svg { color: #72d7aa; }
-
-.scan-activity-arrow {
-  position: relative;
-  width: 20px;
-  height: 1px;
-  flex: 0 0 20px;
-  background: #506988;
-}
-
-.scan-activity-arrow::after {
-  position: absolute;
-  right: 0;
-  top: -3px;
-  width: 6px;
-  height: 6px;
-  border-top: 1px solid #7795c3;
-  border-right: 1px solid #7795c3;
-  content: "";
-  transform: rotate(45deg);
-}
-
-.scan-activity-files {
-  position: relative;
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-  padding: 5px 7px;
-  border: 1px solid #2c3d54;
-  border-radius: 7px;
-  background: #0c141f;
-  overflow: hidden;
-}
-
-.scan-activity-file {
-  position: relative;
-  gap: 6px;
-  min-height: 19px;
-  padding: 3px 5px;
-  border-radius: 4px;
-  background: #162336;
-  color: #9cacbf;
-  font-size: 13px;
-  animation: scanFileRowIn 2.8s ease-in-out infinite;
-}
-
-.scan-activity-file:nth-child(2) { animation-delay: 180ms; }
-.scan-activity-file:nth-child(3) { animation-delay: 360ms; }
-.scan-activity-file svg { color: #7197db; }
-.scan-activity-file i {
-  width: 6px;
-  height: 6px;
-  margin-left: auto;
-  border-radius: 50%;
-  background: #59708f;
-}
-
-.scan-file-state-0 i { background: #6fd1a2; }
-.scan-file-state-1 i { background: #e0ad66; }
-.scan-file-state-2 i { background: #59708f; }
-
-.scan-activity-scan-line {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 2px;
-  background: #7da6ff;
-  box-shadow: 0 0 12px rgba(125, 166, 255, 0.8);
-  animation: scanFileLine 2.2s ease-in-out infinite;
-}
-
-@keyframes scanActivityPulse {
-  0%, 100% { opacity: 0.68; transform: scale(0.96); }
-  50% { opacity: 1; transform: scale(1); }
-}
-
-@keyframes scanActivityLivePulse {
-  0%, 100% { opacity: 0.55; transform: scale(0.86); }
-  50% { opacity: 1; transform: scale(1); }
-}
-
-@keyframes scanFileLine {
-  0% { left: 0; opacity: 0; }
-  15% { opacity: 1; }
-  85% { opacity: 1; }
-  100% { left: 100%; opacity: 0; }
-}
-
-@keyframes scanFileRowIn {
-  0%, 100% { opacity: 0.62; transform: translateX(0); }
-  18%, 72% { opacity: 1; transform: translateX(2px); }
-}
-
 
 
 /* =========================================================
@@ -1295,7 +1056,7 @@ button:disabled {
   outline: 0;
   background: transparent;
   color: #eeeeef;
-  font-size: 16px;
+  font-size: 11px;
 }
 
 .dashboard-search input::placeholder {
@@ -1304,7 +1065,7 @@ button:disabled {
 
 .dashboard-title-mini {
   color: #d2d2d5;
-  font-size: 16px;
+  font-size: 10px;
   font-weight: 600;
 }
 
@@ -1320,7 +1081,7 @@ button:disabled {
   gap: 7px;
   padding: 8px 10px;
   border-radius: 9px;
-  font-size: 13px;
+  font-size: 8px;
   border: 1px solid transparent;
 }
 
@@ -1401,7 +1162,7 @@ button:disabled {
 .report-header p {
   margin: 7px 0 0;
   color: #6f6f74;
-  font-size: 14px;
+  font-size: 9px;
 }
 
 .report-actions {
@@ -1416,7 +1177,7 @@ button:disabled {
   height: 37px;
   border-radius: 11px;
   padding: 0 14px;
-  font-size: 14px;
+  font-size: 9px;
   font-weight: 600;
 }
 
@@ -1475,13 +1236,13 @@ button:disabled {
 .analysis-flow-step > div:last-child > span {
   display: block;
   color: #5d5d64;
-  font-size: 13px;
+  font-size: 7px;
 }
 
 .analysis-flow-step strong {
   display: block;
   color: #dddde0;
-  font-size: 16px;
+  font-size: 10px;
   margin-top: 3px;
 }
 
@@ -1489,7 +1250,7 @@ button:disabled {
   display: block;
   margin-top: 3px;
   color: #676a72;
-  font-size: 13px;
+  font-size: 7px;
 }
 
 .analysis-flow-line {
@@ -1534,7 +1295,7 @@ button:disabled {
 
 .summary-top > span {
   color: #7c7c82;
-  font-size: 13px;
+  font-size: 8px;
 }
 
 .dashboard-summary-card.light
@@ -1561,7 +1322,7 @@ button:disabled {
 
 .dashboard-summary-card > small {
   color: #65656a;
-  font-size: 13px;
+  font-size: 8px;
 }
 
 
@@ -1674,7 +1435,7 @@ button:disabled {
   max-width: 560px;
   margin: 5px 0 0;
   color: #77777d;
-  font-size: 14px;
+  font-size: 9px;
   line-height: 1.5;
 }
 
@@ -1694,7 +1455,7 @@ button:disabled {
 .security-posture-metrics span {
   display: block;
   color: #65656b;
-  font-size: 13px;
+  font-size: 7px;
 }
 
 .security-posture-metrics strong {
@@ -1735,7 +1496,7 @@ button:disabled {
   border-radius: 8px;
   background: #303033;
   color: #85858a;
-  font-size: 13px;
+  font-size: 8px;
 }
 
 
@@ -1783,14 +1544,14 @@ button:disabled {
 .content-type-copy strong {
   display: block;
   color: #dddddf;
-  font-size: 16px;
+  font-size: 10px;
 }
 
 .content-type-copy span {
   display: block;
   margin-top: 5px;
   color: #68686d;
-  font-size: 13px;
+  font-size: 8px;
 }
 
 .content-type-arrow {
@@ -1801,7 +1562,7 @@ button:disabled {
 .no-data-message {
   padding: 30px;
   color: #66666c;
-  font-size: 14px;
+  font-size: 9px;
   text-align: center;
 }
 
@@ -1836,7 +1597,7 @@ button:disabled {
   display: flex;
   justify-content: space-between;
   color: #8c8c91;
-  font-size: 13px;
+  font-size: 8px;
   margin-bottom: 7px;
 }
 
@@ -1890,7 +1651,7 @@ button:disabled {
 
 .risk-footer span {
   color: #636369;
-  font-size: 13px;
+  font-size: 7px;
 }
 
 .risk-footer strong {
@@ -1950,7 +1711,7 @@ button:disabled {
 .algorithm-donut span {
   margin-top: 3px;
   color: #6c6c71;
-  font-size: 13px;
+  font-size: 8px;
 }
 
 .algorithm-list {
@@ -1965,7 +1726,7 @@ button:disabled {
   justify-content: space-between;
   align-items: center;
   color: #a6a6aa;
-  font-size: 13px;
+  font-size: 8px;
 }
 
 .algorithm-row > div {
@@ -2014,7 +1775,7 @@ button:disabled {
 
 .muted {
   color: #66666b;
-  font-size: 13px;
+  font-size: 8px;
 }
 
 
@@ -2044,7 +1805,7 @@ button:disabled {
   align-items: center;
   gap: 8px;
   color: #9f9fa4;
-  font-size: 14px;
+  font-size: 9px;
 }
 
 .project-file-row svg {
@@ -2053,7 +1814,7 @@ button:disabled {
 
 .project-file-row strong {
   color: #dddddf;
-  font-size: 14px;
+  font-size: 9px;
 }
 
 
@@ -2101,14 +1862,14 @@ button:disabled {
 .recommendation-main strong {
   display: block;
   color: #e7e7ea;
-  font-size: 16px;
+  font-size: 11px;
   line-height: 1.45;
 }
 
 .recommendation-main p {
   margin: 7px 0 0;
   color: #727278;
-  font-size: 14px;
+  font-size: 9px;
   line-height: 1.6;
 }
 
@@ -2124,116 +1885,7 @@ button:disabled {
   border-radius: 7px;
   background: #1b2938;
   color: #8eadf2;
-  font-size: 13px;
-}
-
-.recommendation-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 16px;
-}
-
-.recommendation-row {
-  padding: 14px 15px;
-  border: 1px solid #303c4b;
-  border-radius: 7px;
-  background: #171e27;
-}
-
-.recommendation-row-heading {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.recommendation-row-heading > div {
-  min-width: 0;
-}
-
-.recommendation-row-heading strong,
-.recommendation-row-heading span {
-  display: block;
-}
-
-.recommendation-row-heading > div > span {
-  margin-top: 5px;
-  overflow: hidden;
-  color: #8d9bad;
-  font-size: 16px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.recommendation-row-details {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  margin-top: 13px;
-}
-
-.recommendation-row-details span {
-  display: block;
-  color: #748397;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-}
-
-.recommendation-row-details strong {
-  display: block;
-  margin-top: 5px;
-  color: #cbd5e3;
-  font-size: 16px;
-  line-height: 1.3;
-}
-
-.recommendation-primary-name {
-  color: #e5ebf4;
-  font-size: 18px;
-  font-weight: 700;
-  line-height: normal;
-}
-
-.recommendation-row-heading .recommendation-primary-name {
-  font-size: 18px;
-}
-
-.recommendation-row-copy {
-  margin: 12px 0 0;
-  color: #9aa8b9;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.recommendation-view-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 13px;
-  padding: 6px 9px;
-  border: 1px solid #3a526f;
-  border-radius: 5px;
-  background: #1b2a3d;
-  color: #a9c6f3;
-  font: inherit;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.recommendation-view-button:hover {
-  border-color: #6f9dd6;
-  background: #223752;
-}
-
-.recommendation-empty {
-  margin-top: 16px;
-  padding: 18px;
-  border: 1px dashed #334252;
-  color: #8492a3;
-  font-size: 14px;
-  text-align: center;
+  font-size: 8px;
 }
 
 
@@ -2283,7 +1935,7 @@ button:disabled {
   outline: 0;
   background: transparent;
   color: #e6e6e8;
-  font-size: 14px;
+  font-size: 9px;
 }
 
 .inventory-filter {
@@ -2300,7 +1952,7 @@ button:disabled {
   outline: 0;
   background: transparent;
   color: #c1c1c5;
-  font-size: 14px;
+  font-size: 9px;
 }
 
 .inventory-view-toggle {
@@ -2346,7 +1998,7 @@ button:disabled {
   background: #1d1d1e;
   color: #69696e;
   text-align: left;
-  font-size: 13px;
+  font-size: 7px;
   letter-spacing: 0.1em;
 }
 
@@ -2383,19 +2035,19 @@ button:disabled {
 .asset-cell strong {
   display: block;
   color: #e1e1e3;
-  font-size: 14px;
+  font-size: 9px;
 }
 
 .asset-cell span {
   display: block;
   margin-top: 4px;
   color: #66666b;
-  font-size: 13px;
+  font-size: 7px;
 }
 
 .usage-cell {
   color: #a8a8ad;
-  font-size: 13px;
+  font-size: 8px;
 }
 
 .location-cell span {
@@ -2405,14 +2057,14 @@ button:disabled {
   text-overflow: ellipsis;
   white-space: nowrap;
   color: #a6a6aa;
-  font-size: 13px;
+  font-size: 8px;
 }
 
 .location-cell small {
   display: block;
   margin-top: 3px;
   color: #65656a;
-  font-size: 13px;
+  font-size: 7px;
 }
 
 .risk-badge,
@@ -2422,7 +2074,7 @@ button:disabled {
   justify-content: center;
   border-radius: 6px;
   padding: 5px 7px;
-  font-size: 13px;
+  font-size: 7px;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -2462,7 +2114,7 @@ button:disabled {
   padding: 45px 20px !important;
   text-align: center;
   color: #68686d;
-  font-size: 14px;
+  font-size: 9px;
 }
 
 .algorithm-bars-view {
@@ -2478,7 +2130,7 @@ button:disabled {
   justify-content: space-between;
   margin-bottom: 7px;
   color: #9f9fa4;
-  font-size: 14px;
+  font-size: 9px;
 }
 
 .algorithm-bar strong {
@@ -2501,7 +2153,7 @@ button:disabled {
 
 .inventory-footer {
   color: #65656a;
-  font-size: 13px;
+  font-size: 8px;
   text-align: right;
   margin-top: 12px;
 }
@@ -2525,7 +2177,7 @@ button:disabled {
   border-radius: 8px;
   background: #303033;
   color: #8d8d92;
-  font-size: 13px;
+  font-size: 8px;
   cursor: pointer;
 }
 
@@ -2583,7 +2235,7 @@ button:disabled {
   display: block;
   margin-top: 13px;
   color: #dddddf;
-  font-size: 14px;
+  font-size: 9px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2593,7 +2245,7 @@ button:disabled {
   display: block;
   margin-top: 4px;
   color: #66666b;
-  font-size: 13px;
+  font-size: 7px;
 }
 
 .history-metrics {
@@ -2608,7 +2260,7 @@ button:disabled {
   border-radius: 6px;
   background: #2b2b2d;
   color: #85858a;
-  font-size: 13px;
+  font-size: 7px;
 }
 
 .history-metrics small.history-critical {
@@ -2620,7 +2272,7 @@ button:disabled {
   right: 10px;
   bottom: 10px;
   color: #78d59f;
-  font-size: 13px;
+  font-size: 7px;
 }
 
 .history-empty {
@@ -2640,11 +2292,11 @@ button:disabled {
 
 .history-empty strong {
   color: #bcbcc1;
-  font-size: 16px;
+  font-size: 10px;
 }
 
 .history-empty span {
-  font-size: 13px;
+  font-size: 8px;
 }
 
 
@@ -2664,7 +2316,7 @@ button:disabled {
   justify-content: space-between;
   gap: 15px;
   color: #78d5a0;
-  font-size: 13px;
+  font-size: 8px;
 }
 
 .dashboard-status-footer > div {
@@ -2722,7 +2374,7 @@ button:disabled {
 .detail-header p {
   margin: 5px 0 0;
   color: #727277;
-  font-size: 14px;
+  font-size: 9px;
 }
 
 .detail-close {
@@ -2764,14 +2416,14 @@ button:disabled {
 .detail-location-box span {
   display: block;
   color: #626267;
-  font-size: 13px;
+  font-size: 7px;
 }
 
 .detail-location-box strong {
   display: block;
   margin-top: 4px;
   color: #dadadd;
-  font-size: 14px;
+  font-size: 9px;
   word-break: break-all;
 }
 
@@ -2779,7 +2431,7 @@ button:disabled {
   display: block;
   margin-top: 4px;
   color: #67676b;
-  font-size: 13px;
+  font-size: 7px;
 }
 
 .source-code-box {
@@ -2795,7 +2447,7 @@ button:disabled {
   background: #19191a;
   color: #68686c;
   padding: 9px 11px;
-  font-size: 13px;
+  font-size: 7px;
 }
 
 .source-code-box pre {
@@ -2805,7 +2457,7 @@ button:disabled {
   background: #121213;
   color: #d5d5d8;
   font-family: monospace;
-  font-size: 14px;
+  font-size: 9px;
   line-height: 1.65;
   white-space: pre-wrap;
   overflow-x: auto;
@@ -2839,14 +2491,14 @@ button:disabled {
 .detail-recommendation strong {
   display: block;
   color: #dfdfe2;
-  font-size: 16px;
+  font-size: 10px;
 }
 
 .detail-assessment p,
 .detail-recommendation p {
   margin: 6px 0 0;
   color: #727279;
-  font-size: 13px;
+  font-size: 8px;
   line-height: 1.6;
 }
 
@@ -2860,7 +2512,7 @@ button:disabled {
   align-items: center;
   gap: 8px;
   color: #8a8a90;
-  font-size: 14px;
+  font-size: 9px;
 }
 
 
@@ -2899,7 +2551,7 @@ button:disabled {
   max-width: 390px;
   margin: 9px 0 19px;
   color: #6e6e74;
-  font-size: 16px;
+  font-size: 10px;
   line-height: 1.6;
 }
 
@@ -3224,12 +2876,12 @@ button:disabled {
 }
 
 .dashboard-title-mini {
-  font-size: 16px;
+  font-size: 10px;
   letter-spacing: 0.15px;
 }
 
 .dashboard-top-posture {
-  font-size: 16px;
+  font-size: 10px;
 }
 
 .report-header {
@@ -3252,7 +2904,7 @@ button:disabled {
 }
 
 .report-header p {
-  font-size: 16px;
+  font-size: 10px;
   color: #7f8997;
 }
 
@@ -3265,7 +2917,7 @@ button:disabled {
   min-height: 43px;
   padding: 0 16px;
   border-radius: 9px;
-  font-size: 16px;
+  font-size: 10px;
 }
 
 .dashboard-secondary-button {
@@ -3301,15 +2953,15 @@ button:disabled {
 }
 
 .analysis-flow-step span {
-  font-size: 13px;
+  font-size: 7px;
 }
 
 .analysis-flow-step strong {
-  font-size: 16px;
+  font-size: 11px;
 }
 
 .analysis-flow-step small {
-  font-size: 13px;
+  font-size: 8px;
 }
 
 .analysis-flow-line {
@@ -3336,7 +2988,7 @@ button:disabled {
 }
 
 .dashboard-summary-card .summary-top {
-  font-size: 13px;
+  font-size: 8px;
 }
 
 .summary-icon {
@@ -3353,7 +3005,7 @@ button:disabled {
 }
 
 .dashboard-summary-card > small {
-  font-size: 13px;
+  font-size: 8px;
 }
 
 /* Security posture */
@@ -3377,7 +3029,7 @@ button:disabled {
 }
 
 .security-posture-left p {
-  font-size: 14px;
+  font-size: 9px;
 }
 
 .security-posture-metrics {
@@ -3391,7 +3043,7 @@ button:disabled {
 }
 
 .security-posture-metrics span {
-  font-size: 13px;
+  font-size: 7px;
 }
 
 .security-posture-metrics strong {
@@ -3411,7 +3063,7 @@ button:disabled {
 }
 
 .dashboard-card-header .section-kicker {
-  font-size: 13px;
+  font-size: 8px;
 }
 
 .content-type-grid {
@@ -3441,17 +3093,15 @@ button:disabled {
 }
 
 .content-type-copy strong {
-  font-size: 16px;
+  font-size: 11px;
 }
 
 .content-type-copy span {
-  font-size: 13px;
+  font-size: 8px;
 }
 
 /* Full-width graph */
 .algorithm-footprint-card {
-  width: 100%;
-  min-width: 0;
   margin-top: 12px;
 }
 
@@ -3459,7 +3109,7 @@ button:disabled {
   margin: 8px 0 0;
   max-width: 680px;
   color: var(--ref-muted);
-  font-size: 14px;
+  font-size: 9px;
   line-height: 1.55;
 }
 
@@ -3472,7 +3122,7 @@ button:disabled {
   background: #18233a;
   border: 1px solid #33476d;
   color: #8eabf0;
-  font-size: 13px;
+  font-size: 8px;
 }
 
 .algorithm-footprint-chart {
@@ -3498,7 +3148,7 @@ button:disabled {
   flex-direction: column;
   justify-content: space-between;
   color: #667181;
-  font-size: 13px;
+  font-size: 7px;
 }
 
 .algorithm-footprint-row {
@@ -3515,7 +3165,7 @@ button:disabled {
   gap: 8px;
   min-width: 0;
   color: #acb3be;
-  font-size: 14px;
+  font-size: 9px;
 }
 
 .algorithm-footprint-label > span:last-child {
@@ -3580,7 +3230,7 @@ button:disabled {
 
 .algorithm-footprint-row strong {
   color: #dce1e8;
-  font-size: 16px;
+  font-size: 11px;
   text-align: right;
 }
 
@@ -3599,7 +3249,7 @@ button:disabled {
   align-items: center;
   gap: 7px;
   color: #737d8b;
-  font-size: 13px;
+  font-size: 8px;
 }
 
 .algorithm-footprint-footer > div:not(:first-child) {
@@ -3644,7 +3294,7 @@ button:disabled {
 }
 
 .business-criticality-card span {
-  font-size: 13px;
+  font-size: 7px;
 }
 
 .business-criticality-card strong {
@@ -3652,7 +3302,7 @@ button:disabled {
 }
 
 .business-criticality-card small {
-  font-size: 13px;
+  font-size: 8px;
 }
 
 /* Recommendation */
@@ -3667,11 +3317,11 @@ button:disabled {
 }
 
 .recommendation-main strong {
-  font-size: 16px;
+  font-size: 10px;
 }
 
 .recommendation-main p {
-  font-size: 13px;
+  font-size: 8px;
 }
 
 .recommendation-tags span {
@@ -3685,24 +3335,11 @@ button:disabled {
   margin-top: 12px;
 }
 
-.cbom-direct-layout {
-  display: grid;
-  align-items: stretch;
-  grid-template-columns: minmax(0, 1.08fr) minmax(300px, 0.92fr);
-  gap: 16px;
-  margin-top: 18px;
-}
-
-.cbom-structured-column,
-.cbom-json-column {
-  min-width: 0;
-}
-
 .cbom-description {
   margin: 8px 0 0;
   max-width: 720px;
   color: #7b8593;
-  font-size: 14px;
+  font-size: 9px;
   line-height: 1.6;
 }
 
@@ -3720,8 +3357,9 @@ button:disabled {
 
 .cbom-summary-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 9px;
+  margin-top: 20px;
 }
 
 .cbom-summary-grid > div {
@@ -3734,156 +3372,14 @@ button:disabled {
 .cbom-summary-grid span {
   display: block;
   color: #6f7987;
-  font-size: 13px;
+  font-size: 7px;
 }
 
 .cbom-summary-grid strong {
   display: block;
   margin-top: 7px;
-  overflow-wrap: anywhere;
   color: #e3e7ec;
-  font-size: 15px;
-}
-
-.cbom-components-heading,
-.cbom-json-header,
-.cbom-json-actions {
-  display: flex;
-  align-items: center;
-}
-
-.cbom-components-heading,
-.cbom-json-header {
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.cbom-components-heading {
-  margin-top: 18px;
-}
-
-.cbom-components-heading h3 {
-  margin: 6px 0 0;
-  color: #e3e7ec;
-  font-size: 13px;
-}
-
-.cbom-search {
-  width: min(190px, 48%);
-}
-
-.cbom-component-table-wrapper {
-  max-height: 360px;
-  margin-top: 11px;
-  overflow: auto;
-  border: 1px solid #29323e;
-  border-radius: 9px;
-}
-
-.cbom-component-table {
-  width: 100%;
-  min-width: 650px;
-  border-collapse: collapse;
-}
-
-.cbom-component-table th {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  height: 38px;
-  padding: 0 10px;
-  background: #151d28;
-  color: #748397;
-  font-size: 13px;
-  text-align: left;
-  white-space: nowrap;
-}
-
-.cbom-component-table td {
-  padding: 11px 10px;
-  border-top: 1px solid #252f3b;
-  color: #b9c3d1;
-  font-size: 13px;
-  vertical-align: middle;
-}
-
-.cbom-component-table td strong {
-  color: #e0e6ee;
-  font-size: 14px;
-}
-
-.cbom-json-column {
-  display: flex;
-  flex-direction: column;
-  padding: 14px;
-  border: 1px solid #2b3542;
-  border-radius: 9px;
-  background: #10151d;
-}
-
-.cbom-json-header {
-  align-items: flex-start;
-}
-
-.cbom-json-header > div:first-child {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.cbom-json-header strong {
-  color: #dce3ed;
-  font-size: 16px;
-}
-
-.cbom-json-actions {
-  align-items: stretch;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 6px;
-}
-
-.cbom-json-actions button {
-  min-height: 30px;
-  padding: 7px 9px;
-  font-size: 13px;
-}
-
-.cbom-json-preview {
-  flex: 1 1 auto;
-  max-height: 540px;
-  min-height: 500px;
-  margin: 13px 0 0;
-  padding: 13px;
-  overflow: auto;
-  border: 1px solid #29323e;
-  border-radius: 8px;
-  background: #090c11;
-  color: #b9c8e6;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 13px;
-  line-height: 1.55;
-  white-space: pre;
-}
-
-.cbom-empty-state {
-  min-height: 130px;
-  margin-top: 11px;
-  padding: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
-  border: 1px dashed #344154;
-  border-radius: 9px;
-  background: #10151d;
-  color: #8c9bb0;
-  font-size: 16px;
-}
-
-.cbom-empty-state svg {
-  color: #7697da;
+  font-size: 20px;
 }
 
 .cbom-actions {
@@ -3912,14 +3408,14 @@ button:disabled {
 .cbom-format strong {
   display: block;
   color: #d9dfe7;
-  font-size: 14px;
+  font-size: 9px;
 }
 
 .cbom-format small {
   display: block;
   margin-top: 3px;
   color: #697482;
-  font-size: 13px;
+  font-size: 7px;
 }
 
 .cbom-button {
@@ -3933,12 +3429,12 @@ button:disabled {
 
 .inventory-table th {
   height: 47px;
-  font-size: 13px;
+  font-size: 8px;
 }
 
 .inventory-table td {
   padding: 17px 13px;
-  font-size: 16px;
+  font-size: 10px;
 }
 
 .inventory-row.expanded {
@@ -3973,7 +3469,7 @@ button:disabled {
 }
 
 .asset-dropdown-info strong {
-  font-size: 16px;
+  font-size: 10px;
 }
 
 .asset-dropdown-panel {
@@ -3986,7 +3482,7 @@ button:disabled {
 }
 
 .asset-source-mini-body pre {
-  font-size: 16px;
+  font-size: 10px;
 }
 
 .asset-recommendation-box {
@@ -3995,7 +3491,7 @@ button:disabled {
 }
 
 .asset-dropdown-footer {
-  font-size: 13px;
+  font-size: 8px;
 }
 
 /* History */
@@ -4011,11 +3507,11 @@ button:disabled {
 }
 
 .history-card > strong {
-  font-size: 16px;
+  font-size: 10px;
 }
 
 .history-card > span {
-  font-size: 13px;
+  font-size: 8px;
 }
 
 /* Responsive graph */
@@ -4026,19 +3522,6 @@ button:disabled {
 
   .cbom-summary-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .cbom-direct-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .cbom-json-column {
-    display: block;
-  }
-
-  .cbom-json-preview {
-    max-height: 360px;
-    min-height: 160px;
   }
 
   .algorithm-footprint-row {
@@ -4056,7 +3539,7 @@ button:disabled {
   }
 
   .algorithm-footprint-label {
-    font-size: 13px;
+    font-size: 8px;
   }
 }
 
@@ -4067,20 +3550,6 @@ button:disabled {
 
   .cbom-summary-grid {
     grid-template-columns: 1fr;
-  }
-
-  .cbom-components-heading,
-  .cbom-json-header {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .cbom-search {
-    width: 100%;
-  }
-
-  .cbom-json-actions {
-    justify-content: flex-start;
   }
 
   .cbom-actions,
@@ -4097,11 +3566,11 @@ button:disabled {
   }
 
   .algorithm-footprint-label {
-    font-size: 13px;
+    font-size: 7px;
   }
 
   .algorithm-footprint-row strong {
-    font-size: 14px;
+    font-size: 9px;
   }
 }
 /* ============================================================
@@ -4173,7 +3642,7 @@ button:disabled {
 
   color: #7c8795;
 
-  font-size: 16px;
+  font-size: 10px;
   line-height: 1.5;
 }
 
@@ -4232,7 +3701,7 @@ button:disabled {
 
   color: #6f7a88;
 
-  font-size: 13px;
+  font-size: 7px;
   line-height: 1;
 
   font-weight: 700;
@@ -4249,7 +3718,7 @@ button:disabled {
 
   color: #e0e5eb;
 
-  font-size: 16px;
+  font-size: 11px;
 
   line-height: 1.45;
 
@@ -4371,7 +3840,7 @@ button:disabled {
     Consolas,
     monospace;
 
-  font-size: 13px;
+  font-size: 8px;
 }
 
 .asset-source-mini-header span:first-child {
@@ -4418,7 +3887,7 @@ button:disabled {
     Consolas,
     monospace;
 
-  font-size: 13px;
+  font-size: 8px;
   line-height: 1.7;
 }
 
@@ -4452,7 +3921,7 @@ button:disabled {
     Consolas,
     monospace;
 
-  font-size: 16px;
+  font-size: 10px;
 
   line-height: 1.7;
 
@@ -4466,7 +3935,7 @@ button:disabled {
 
   color: #6e7885;
 
-  font-size: 13px;
+  font-size: 8px;
   line-height: 1.5;
 }
 
@@ -4500,7 +3969,7 @@ button:disabled {
 
   color: #e1e6ee;
 
-  font-size: 16px;
+  font-size: 10px;
 
   line-height: 1.7;
 
@@ -4554,7 +4023,7 @@ button:disabled {
 
   color: #6d7886;
 
-  font-size: 13px;
+  font-size: 7px;
   line-height: 1;
 
   font-weight: 700;
@@ -4571,7 +4040,7 @@ button:disabled {
 
   color: #e0e5eb;
 
-  font-size: 16px;
+  font-size: 10px;
   line-height: 1.4;
 
   font-weight: 650;
@@ -4597,7 +4066,7 @@ button:disabled {
 
   color: #6d7886;
 
-  font-size: 13px;
+  font-size: 7px;
 
   line-height: 1;
 
@@ -4635,7 +4104,7 @@ button:disabled {
 
   color: #88a8ff;
 
-  font-size: 13px;
+  font-size: 8px;
 
   font-weight: 600;
 }
@@ -4701,7 +4170,7 @@ button:disabled {
 
   color: #d0d6dd;
 
-  font-size: 14px;
+  font-size: 9px;
 
   line-height: 1.45;
 
@@ -4734,7 +4203,7 @@ button:disabled {
 
   color: #697481;
 
-  font-size: 13px;
+  font-size: 8px;
 }
 
 .asset-dropdown-footer button {
@@ -4757,7 +4226,7 @@ button:disabled {
 
   color: #b3bbc5;
 
-  font-size: 13px;
+  font-size: 8px;
 
   cursor: pointer;
 }
@@ -4928,7 +4397,7 @@ button:disabled {
     Consolas,
     monospace;
 
-  font-size: 13px !important;
+  font-size: 8px !important;
 
   font-weight: 700 !important;
 
@@ -5047,7 +4516,7 @@ button:disabled {
 
   color: #788392 !important;
 
-  font-size: 13px !important;
+  font-size: 8px !important;
 
   line-height: 1.4 !important;
 
@@ -5197,7 +4666,7 @@ button:disabled {
 
 .section-kicker {
   color: #8290a3 !important;
-  font-size: 13px !important;
+  font-size: 8px !important;
   font-weight: 700;
   letter-spacing: 1.7px !important;
 }
@@ -5246,7 +4715,7 @@ button:disabled {
 .dashboard-summary-card .summary-top {
   color: #8190a3 !important;
 
-  font-size: 13px !important;
+  font-size: 8px !important;
 
   letter-spacing: 1.45px !important;
 }
@@ -5283,7 +4752,7 @@ button:disabled {
 
   color: #7f8b9b !important;
 
-  font-size: 14px !important;
+  font-size: 9px !important;
 }
 
 
@@ -5396,7 +4865,7 @@ button:disabled {
 
   color: #808b9a !important;
 
-  font-size: 16px !important;
+  font-size: 10px !important;
 
   line-height: 1.6 !important;
 }
@@ -5422,7 +4891,7 @@ button:disabled {
 .security-posture-metrics span {
   color: #6d7887 !important;
 
-  font-size: 13px !important;
+  font-size: 7px !important;
 
   letter-spacing: 0.7px;
   text-transform: uppercase;
@@ -5434,6 +4903,218 @@ button:disabled {
   color: #e2e7ed !important;
 
   font-size: 17px !important;
+}
+
+
+/* ============================================================
+   MIGRATION TIMING
+   ============================================================ */
+
+.migration-timing-card {
+  margin-top: 12px !important;
+
+  min-height: 240px;
+
+  padding: 25px !important;
+}
+
+.migration-timing-description {
+  max-width: 800px;
+
+  margin: 9px 0 0;
+
+  color: #7b8796;
+
+  font-size: 10px;
+
+  line-height: 1.65;
+}
+
+.mosca-summary {
+  width: 100%;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(240px, 0.75fr)
+    minmax(0, 1.25fr);
+
+  gap: 13px;
+
+  margin-top: 22px;
+
+  align-items: stretch;
+}
+
+.mosca-primary {
+  min-height: 110px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: center;
+
+  padding: 18px 20px;
+
+  border-radius: 10px;
+
+  background: #151d29;
+
+  border:
+    1px solid
+    #2f3c4e;
+}
+
+.mosca-primary > span {
+  color: #748092;
+
+  font-size: 7px;
+
+  font-weight: 700;
+
+  letter-spacing: 1.15px;
+}
+
+.mosca-primary > strong {
+  margin-top: 9px;
+
+  color: #eef2f6;
+
+  font-size: 39px;
+
+  line-height: 1;
+
+  letter-spacing: -1.2px;
+}
+
+.mosca-primary > strong small {
+  margin-left: 5px;
+
+  color: #7e8a9a;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  letter-spacing: 0;
+}
+
+.mosca-status-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 9px;
+}
+
+.mosca-status-item {
+  min-height: 110px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: center;
+
+  padding: 17px;
+
+  border-radius: 10px;
+
+  background: #151d29;
+
+  border:
+    1px solid
+    #2f3c4e;
+}
+
+.mosca-status-item span {
+  color: #748092;
+
+  font-size: 7px;
+
+  font-weight: 700;
+
+  letter-spacing: 1.05px;
+}
+
+.mosca-status-item strong {
+  margin-top: 8px;
+
+  color: #eef2f6;
+
+  font-size: 30px;
+
+  line-height: 1;
+}
+
+.mosca-status-item.action {
+  border-color: #553039;
+}
+
+.mosca-status-item.action strong {
+  color: #ff737a;
+}
+
+.mosca-status-item.prioritize {
+  border-color: #57432c;
+}
+
+.mosca-status-item.prioritize strong {
+  color: #ffae64;
+}
+
+.mosca-status-item.plan {
+  border-color: #304b40;
+}
+
+.mosca-status-item.plan strong {
+  color: #6ed5a4;
+}
+
+.mosca-note {
+  width: 100%;
+
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 12px;
+
+  margin-top: 13px;
+
+  padding: 13px 15px;
+
+  border-radius: 8px;
+
+  background: #101720;
+
+  border:
+    1px solid
+    #283442;
+}
+
+.mosca-note-label {
+  flex-shrink: 0;
+
+  color: #718095;
+
+  font-size: 7px;
+
+  font-weight: 700;
+
+  letter-spacing: 1px;
+}
+
+.mosca-note p {
+  margin: 0;
+
+  color: #7d8998;
+
+  font-size: 9px;
+
+  line-height: 1.55;
 }
 
 
@@ -5469,13 +5150,13 @@ button:disabled {
 .recommendation-main strong {
   color: #e2e7ef !important;
 
-  font-size: 16px !important;
+  font-size: 10px !important;
 }
 
 .recommendation-main p {
   color: #7d8999 !important;
 
-  font-size: 14px !important;
+  font-size: 9px !important;
 }
 
 
@@ -5484,730 +5165,73 @@ button:disabled {
    ============================================================ */
 
 .inventory-table th {
-  font-size: 13px !important;
+  font-size: 8px !important;
 
   letter-spacing: 1.15px !important;
 }
 
 .inventory-table td {
-  font-size: 16px !important;
+  font-size: 10px !important;
 
   padding: 17px 14px !important;
 }
 
 .asset-cell strong {
-  font-size: 16px !important;
+  font-size: 11px !important;
 }
 
 .asset-cell span {
-  font-size: 13px !important;
+  font-size: 8px !important;
 }
 
 .key-mode-cell span {
-  font-size: 16px !important;
+  font-size: 10px !important;
 }
 
 .key-mode-cell small {
-  font-size: 13px !important;
+  font-size: 8px !important;
 }
 
 .location-cell span {
-  font-size: 14px !important;
+  font-size: 9px !important;
 }
 
 .location-cell small {
-  font-size: 13px !important;
+  font-size: 8px !important;
 }
 
 
 /* ============================================================
-   CRYPTOGRAPHIC ANALYSIS VIEWS
+   RESPONSIVE MIGRATION CARD
    ============================================================ */
 
-.analysis-view-tabs {
-  display: flex;
-  gap: 7px;
-  margin-top: 20px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #2b3440;
-}
+@media (max-width: 900px) {
 
-.analysis-view-tabs button {
-  padding: 9px 12px;
-  border: 1px solid #2c3949;
-  border-radius: 7px;
-  background: #111923;
-  color: #7c899a;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.75px;
-  text-transform: uppercase;
-  cursor: pointer;
-}
-
-.analysis-view-tabs button:hover,
-.analysis-view-tabs button.active {
-  border-color: #526fae;
-  background: #1a2945;
-  color: #dce7ff;
-}
-
-.dependency-explorer {
-  width: 100%;
-  min-width: 0;
-  margin-top: 17px;
-}
-
-.dependency-explorer-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.dependency-explorer-toolbar p {
-  margin: 7px 0 0;
-  color: #778496;
-  font-size: 14px;
-}
-
-.dependency-zoom-controls {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  flex-shrink: 0;
-}
-
-.dependency-zoom-controls button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 27px;
-  height: 27px;
-  border: 1px solid #314052;
-  border-radius: 6px;
-  background: #121a25;
-  color: #99a9c0;
-  cursor: pointer;
-}
-
-.dependency-zoom-controls button:hover {
-  border-color: #5879be;
-  color: #dce7ff;
-}
-
-.dependency-zoom-controls .dependency-fit-button {
-  width: auto;
-  gap: 5px;
-  padding: 0 8px;
-}
-
-.dependency-fit-button span {
-  font-size: 13px;
-}
-
-.dependency-zoom-controls span {
-  min-width: 40px;
-  color: #8290a2;
-  font-size: 13px;
-  text-align: center;
-}
-
-.dependency-graph-canvas {
-  width: 100%;
-  min-width: 0;
-  height: min(680px, 72vh);
-  min-height: 560px;
-  margin-top: 15px;
-  overflow: hidden;
-  border: 1px solid #2b3948;
-  border-radius: 10px;
-  background:
-    linear-gradient(rgba(90, 117, 157, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(90, 117, 157, 0.06) 1px, transparent 1px),
-    #0d141d;
-  background-size: 28px 28px;
-  cursor: grab;
-}
-
-.dependency-graph-canvas.dragging {
-  cursor: grabbing;
-}
-
-.dependency-graph-svg {
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-  transform-origin: center;
-  transition: transform 120ms ease;
-}
-
-.dependency-graph-canvas.dragging .dependency-graph-svg {
-  transition: none;
-}
-
-.dependency-graph-edge line {
-  stroke: #526174;
-  stroke-width: 1.5;
-}
-
-.dependency-graph-edge text {
-  fill: #7c8b9e;
-  font-size: 14px;
-  text-anchor: middle;
-}
-
-.dependency-graph-edge.dimmed,
-.dependency-graph-svg .dimmed {
-  opacity: 0.17;
-}
-
-.dependency-graph-node {
-  width: 156px;
-  min-height: 58px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-  padding: 7px 9px;
-  overflow: hidden;
-  border-width: 1px;
-  border-style: solid;
-  border-radius: 7px;
-  background: #151e2a;
-  color: #e0e6ef;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-.dependency-graph-node:hover,
-.dependency-graph-node.selected {
-  background: #203454;
-  box-shadow: 0 0 0 2px rgba(115, 157, 239, 0.28);
-}
-
-.dependency-node-dot {
-  width: 6px;
-  height: 6px;
-  margin-bottom: 1px;
-  border-radius: 50%;
-}
-
-.dependency-node-type {
-  color: #7f91a7;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-}
-
-.dependency-graph-node strong {
-  width: 100%;
-  overflow: hidden;
-  color: #e0e6ef;
-  font-size: 14px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.dependency-graph-node small {
-  width: 100%;
-  overflow: hidden;
-  color: #77889d;
-  font-size: 13px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.dependency-node-progress {
-  width: 100%;
-  height: 4px;
-  margin-top: 4px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: #384558;
-}
-
-.dependency-node-progress i {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: #62d2a7;
-}
-
-.dependency-graph-node:hover .dependency-node-progress i,
-.dependency-graph-node.selected .dependency-node-progress i {
-  background: #87e8c1;
-}
-
-.dependency-empty-state {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 220px;
-  margin-top: 15px;
-  padding: 28px;
-  border: 1px dashed #334356;
-  border-radius: 10px;
-  background: #101821;
-  color: #8491a2;
-  font-size: 16px;
-  text-align: center;
-}
-
-.dependency-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 13px;
-  margin-top: 12px;
-  color: #7f8da0;
-  font-size: 13px;
-}
-
-.dependency-legend span {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.dependency-legend i {
-  width: 7px;
-  height: 7px;
-  display: inline-block;
-  border-radius: 50%;
-}
-
-.dependency-legend-edge i {
-  width: 17px;
-  height: 1px;
-  border-radius: 0;
-  background: #657387;
-}
-
-.dependency-selection-note,
-.dependency-cap-note {
-  margin-top: 10px;
-  color: #758397;
-  font-size: 13px;
-}
-
-.dependency-selection-note strong {
-  color: #d8e4fb;
-}
-
-.dependency-tree-view {
-  height: 600px;
-  margin-top: 15px;
-  border: 1px solid #2b3948;
-  border-radius: 10px;
-  background: #0d141d;
-}
-
-.dependency-tree-controls {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 6px;
-  height: 42px;
-  padding: 0 12px;
-  border-bottom: 1px solid #243346;
-  background: #111b28;
-}
-
-.dependency-tree-controls button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 25px;
-  height: 25px;
-  padding: 0 6px;
-  border: 1px solid #34465e;
-  border-radius: 5px;
-  background: #172438;
-  color: #aabbd8;
-  font: inherit;
-  cursor: pointer;
-}
-
-.dependency-tree-controls button:hover {
-  border-color: #7196e2;
-  background: #223658;
-  color: #e1eaff;
-}
-
-.dependency-tree-controls span {
-  min-width: 38px;
-  color: #8495ad;
-  font-size: 14px;
-  text-align: center;
-}
-
-.dependency-tree-viewport {
-  position: relative;
-  height: calc(100% - 43px);
-  overflow: hidden;
-  cursor: grab;
-  touch-action: none;
-}
-
-.dependency-tree-viewport.dragging {
-  cursor: grabbing;
-}
-
-.dependency-tree-canvas {
-  position: relative;
-  transform-origin: top left;
-  transition: transform 120ms ease;
-}
-
-.dependency-tree-viewport.dragging .dependency-tree-canvas {
-  transition: none;
-}
-
-.dependency-tree-svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-  pointer-events: none;
-}
-
-.dependency-tree-edge path {
-  fill: none;
-  stroke: #d9dce2;
-  stroke-width: 2;
-}
-
-.dependency-tree-edge text {
-  fill: #8a96a8;
-  font-size: 13px;
-  text-anchor: middle;
-  opacity: 0;
-  pointer-events: none;
-  paint-order: stroke;
-  stroke: #0d141d;
-  stroke-width: 6px;
-  stroke-linejoin: round;
-}
-
-.dependency-tree-edge:hover text,
-.dependency-tree-edge.selected text {
-  opacity: 1;
-}
-
-.dependency-tree-edge.dimmed,
-.dependency-tree-node-layer.dimmed {
-  opacity: 0.18;
-}
-
-.dependency-tree-node-layer {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 156px;
-  min-height: 74px;
-  z-index: 1;
-}
-
-.dependency-tree-toggle,
-.dependency-tree-toggle-spacer {
-  width: 22px;
-  height: 22px;
-  position: absolute;
-  top: -10px;
-  right: -10px;
-  flex: 0 0 22px;
-  z-index: 2;
-}
-
-.dependency-tree-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #40536d;
-  border-radius: 50%;
-  background: #172438;
-  color: #b7c9ec;
-  font: inherit;
-  font-size: 14px;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.dependency-tree-toggle:hover {
-  border-color: #7196e2;
-  background: #223658;
-}
-
-/* ============================================================
-   SCENARIO CONTROLS
-   ============================================================ */
-
-.scenario-controls {
-  margin-top: 18px;
-  padding-top: 18px;
-  border-top: 1px solid #2b3440;
-}
-
-.scenario-controls-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 18px;
-}
-
-.scenario-controls-header h3 {
-  margin: 7px 0 0;
-  color: #e3e8ef;
-  font-size: 14px;
-}
-
-.scenario-controls-header p {
-  margin: 7px 0 0;
-  color: #788597;
-  font-size: 14px;
-}
-
-.scenario-urgency {
-  min-width: 145px;
-  align-self: flex-start;
-  padding: 10px 12px;
-  border: 1px solid #30425a;
-  border-radius: 8px;
-  background: #152137;
-}
-
-.scenario-urgency span {
-  display: block;
-  color: #8294ae;
-  font-size: 13px;
-  letter-spacing: 0.6px;
-  text-transform: uppercase;
-}
-
-.scenario-urgency strong {
-  display: block;
-  margin-top: 6px;
-  color: #b8cbfa;
-  font-size: 16px;
-}
-
-.scenario-urgency.action-required strong { color: #ff737a; }
-.scenario-urgency.prioritize strong { color: #ffae64; }
-.scenario-urgency.plan strong { color: #6ed5a4; }
-
-.scenario-control-grid,
-.scenario-metrics-grid,
-.scenario-status-counts {
-  display: grid;
-  gap: 9px;
-}
-
-.scenario-control-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin-top: 16px;
-}
-
-.scenario-control-grid label {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  color: #8a98aa;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-}
-
-.scenario-control-grid select,
-.scenario-control-grid input {
-  width: 100%;
-  min-height: 32px;
-  padding: 7px 9px;
-  border: 1px solid #324152;
-  border-radius: 6px;
-  outline: none;
-  background: #111923;
-  color: #dce4ef;
-  font: inherit;
-  font-size: 16px;
-}
-
-.scenario-control-grid select:focus,
-.scenario-control-grid input:focus {
-  border-color: #5e7fc2;
-}
-
-.scenario-control-grid small {
-  color: #758397;
-  font-size: 13px;
-  font-weight: 400;
-  letter-spacing: 0;
-  text-transform: none;
-}
-
-.scenario-metrics-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  margin-top: 12px;
-}
-
-.scenario-metric {
-  min-height: 54px;
-  padding: 10px;
-  border: 1px solid #2b3949;
-  border-radius: 7px;
-  background: #111923;
-}
-
-.scenario-metric span {
-  display: block;
-  color: #778597;
-  font-size: 13px;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-}
-
-.scenario-metric strong {
-  display: block;
-  margin-top: 6px;
-  color: #dfe7f0;
-  font-size: 16px;
-}
-
-.scenario-results-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 13px;
-  margin-top: 15px;
-}
-
-.scenario-subheading {
-  color: #8290a1;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.7px;
-  text-transform: uppercase;
-}
-
-.scenario-status-counts {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  margin-top: 8px;
-}
-
-.scenario-status-counts .scenario-metric strong {
-  font-size: 14px;
-}
-
-.scenario-metric.action strong { color: #ff737a; }
-.scenario-metric.prioritize strong { color: #ffae64; }
-.scenario-metric.plan strong { color: #6ed5a4; }
-.scenario-metric.elevated strong { color: #d8bb72; }
-.scenario-metric.normal strong { color: #8ab7e5; }
-
-.scenario-timeline {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-  margin-top: 20px;
-  padding-top: 14px;
-}
-
-.scenario-timeline-line {
-  position: absolute;
-  top: 17px;
-  left: 3%;
-  right: 3%;
-  height: 1px;
-  background: #52647c;
-}
-
-.scenario-timeline-point {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  color: #7e8c9e;
-  font-size: 13px;
-}
-
-.scenario-timeline-point:nth-child(n + 3) {
-  text-align: center;
-}
-
-.scenario-timeline-point:last-child {
-  text-align: right;
-}
-
-.scenario-timeline-point i {
-  z-index: 1;
-  width: 7px;
-  height: 7px;
-  margin-bottom: 3px;
-  border: 2px solid #101821;
-  border-radius: 50%;
-  background: #82a5e8;
-}
-
-.scenario-timeline-point strong {
-  color: #dce4ef;
-  font-size: 16px;
-}
-
-.scenario-disclaimer {
-  margin: 14px 0 0;
-  color: #6f7e91;
-  font-size: 13px;
-  line-height: 1.55;
-}
-
-@media (max-width: 760px) {
-  .dependency-explorer-toolbar,
-  .scenario-controls-header {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .scenario-control-grid,
-  .scenario-results-grid {
+  .mosca-summary {
     grid-template-columns: 1fr;
   }
 
-  .scenario-metrics-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
-@media (max-width: 520px) {
-  .analysis-view-tabs {
-    overflow-x: auto;
+
+@media (max-width: 650px) {
+
+  .migration-timing-card {
+    padding: 19px !important;
   }
 
-  .analysis-view-tabs button {
-    flex-shrink: 0;
+  .mosca-status-grid {
+    grid-template-columns: 1fr;
   }
 
-  .scenario-status-counts {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+.mosca-note {
+    flex-direction: column;
   }
+
 }
 
-/* ============================================================
-   QUANTUM ERA RISK ANALYSIS
-   ============================================================ */
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto !important;
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+.dashboard-two-column.migration-timing-only {
+  grid-template-columns: 1fr !important;
 }
 
 /* ============================================================
@@ -6227,11 +5251,11 @@ button:disabled {
 }
 
 .report-header p {
-  font-size: 16px !important;
+  font-size: 12px !important;
 }
 
 .dashboard-content .section-kicker {
-  font-size: 16px !important;
+  font-size: 10px !important;
 }
 
 .dashboard-card-header h2 {
@@ -6239,7 +5263,7 @@ button:disabled {
 }
 
 .dashboard-summary-card .summary-top {
-  font-size: 16px !important;
+  font-size: 10px !important;
 }
 
 .dashboard-summary-card > strong {
@@ -6247,7 +5271,7 @@ button:disabled {
 }
 
 .dashboard-summary-card > small {
-  font-size: 16px !important;
+  font-size: 10px !important;
 }
 
 .dashboard-summary-card.files-tile {
@@ -6346,7 +5370,7 @@ button:disabled {
 }
 
 .asset-detail-header span {
-  font-size: 13px;
+  font-size: 8px;
 
   font-weight: 700;
 
@@ -6416,7 +5440,7 @@ button:disabled {
 
   color: #728096;
 
-  font-size: 13px;
+  font-size: 7px;
 
   font-weight: 700;
 
@@ -6430,7 +5454,7 @@ button:disabled {
 
   color: #e4e9ef;
 
-  font-size: 16px;
+  font-size: 10px;
 
   line-height: 1.45;
 }
@@ -6457,7 +5481,7 @@ button:disabled {
 
   color: #8793a2;
 
-  font-size: 14px;
+  font-size: 9px;
 
   line-height: 1.6;
 }
@@ -6481,7 +5505,7 @@ button:disabled {
 
   color: #b39bff;
 
-  font-size: 16px;
+  font-size: 11px;
 
   line-height: 1.5;
 }
@@ -6501,7 +5525,7 @@ button:disabled {
 .asset-detail-mosca strong {
   color: #7fd1a2;
 
-  font-size: 16px;
+  font-size: 10px;
 }
 
 @media (max-width: 900px) {
@@ -6532,19 +5556,19 @@ button:disabled {
 }
 
 .asset-cell strong {
-  font-size: 16px !important;
+  font-size: 12px !important;
 }
 
 .asset-cell span {
-  font-size: 14px !important;
+  font-size: 9px !important;
 }
 
 .asset-detail-grid strong {
-  font-size: 16px !important;
+  font-size: 11px !important;
 }
 
 #discovered-content .section-kicker {
-  font-size: 16px !important;
+  font-size: 12px !important;
 }
 
 #discovered-content .dashboard-card-header h2 {
@@ -6552,7 +5576,7 @@ button:disabled {
 }
 
 #discovered-content .card-count {
-  font-size: 16px !important;
+  font-size: 11px !important;
 }
 
 #discovered-content .content-type-grid {
@@ -6578,7 +5602,7 @@ button:disabled {
 
 #discovered-content .content-type-copy span {
   margin-top: 8px;
-  font-size: 16px !important;
+  font-size: 12px !important;
 }
 
 #discovered-content .content-type-arrow {
@@ -6587,491 +5611,1414 @@ button:disabled {
 }
 
 #discovered-content .no-data-message {
-  font-size: 16px;
+  font-size: 12px;
 }
 
-/* =========================================================
-   GLOBAL SEARCH + INVESTIGATION CONTEXT
-   ========================================================= */
-
-.global-search-container {
-  position: relative;
+===== frontend/src/index.css =====
+html {
+  min-width: 320px;
+  background: #191919;
 }
 
-.global-search-container input {
-  min-width: 0;
-}
-
-.global-search-container kbd {
-  flex: 0 0 auto;
-  padding: 3px 5px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 5px;
-  color: #77777e;
-  font-size: 14px;
-  background: rgba(255, 255, 255, 0.025);
-}
-
-.global-search-clear {
-  display: grid;
-  place-items: center;
-  padding: 2px;
-  border: 0;
-  background: transparent;
-  color: #8d8d94;
-  cursor: pointer;
-}
-
-.global-search-clear:hover {
-  color: #f3f3f4;
-}
-
-.global-search-panel {
-  position: absolute;
-  z-index: 100;
-  top: calc(100% + 9px);
-  left: 0;
-  width: min(465px, calc(100vw - 40px));
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 13px;
-  background: #121216;
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.42);
-}
-
-.global-search-panel-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 14px 8px;
-  color: #7d9eaf;
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
-}
-
-.global-search-panel-heading span {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.global-search-panel-heading small {
-  color: #64646b;
-  font-size: 14px;
-  font-weight: 400;
-  letter-spacing: 0;
-  text-transform: none;
-}
-
-.global-search-panel-heading-actions {
-  display: inline-flex !important;
-  align-items: center;
-  gap: 9px;
-}
-
-.global-search-clear-history {
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: #7caebe;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.global-search-clear-history:hover {
-  color: #d2edf1;
-  text-decoration: underline;
-}
-
-.global-search-group + .global-search-group {
-  border-top: 1px solid rgba(255, 255, 255, 0.055);
-}
-
-.global-search-group > button,
-.global-search-recent > button {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  border: 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.035);
-  background: transparent;
-  color: #e5e5e7;
-  text-align: left;
-  cursor: pointer;
-}
-
-.global-search-group > button:hover,
-.global-search-group > button.active,
-.global-search-recent > button:hover {
-  background: #202b32;
-}
-
-.global-search-result-icon {
-  width: 28px;
-  height: 28px;
-  display: grid;
-  flex: 0 0 auto;
-  place-items: center;
-  border-radius: 7px;
-  background: #20262b;
-  color: #71bfd0;
-}
-
-.global-search-result-copy {
-  min-width: 0;
-  flex: 1;
-}
-
-.global-search-result-copy strong,
-.global-search-result-copy small {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.global-search-result-copy strong {
-  color: #ededee;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.global-search-result-copy small {
-  margin-top: 3px;
-  color: #797980;
-  font-size: 14px;
-}
-
-.global-search-result-status {
-  padding: 4px 6px;
-  border-radius: 5px;
-  background: #2b2825;
-  color: #e9b282;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.global-search-result-status.critical {
-  background: #352527;
-  color: #ffaaa7;
-}
-
-.global-search-result-status.high {
-  color: #ffc28b;
-}
-
-.global-search-result-status.low {
-  background: #26392f;
-  color: #91d9ae;
-}
-
-.global-search-empty,
-.global-search-shortcut {
-  min-height: 88px;
-  display: grid;
-  place-items: center;
-  gap: 5px;
-  padding: 16px 22px;
-  color: #8a8a91;
-  font-size: 16px;
-  text-align: center;
-}
-
-.global-search-empty strong {
-  color: #dcdcdf;
-}
-
-.global-search-shortcut {
-  min-height: 42px;
-  display: flex;
-  justify-content: space-between;
-  color: #78baca;
-}
-
-.global-search-shortcut small {
-  color: #696970;
-}
-
-.global-search-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  padding: 8px 14px;
-  border-top: 1px solid rgba(255, 255, 255, 0.055);
-  color: #66666d;
-  font-size: 14px;
-}
-
-.ecdat-context-indicator {
-  min-height: 52px;
-  display: flex;
-  align-items: center;
-  gap: 19px;
-  margin: 12px 0;
-  padding: 10px 16px;
-  border: 1px solid rgba(98, 181, 198, 0.21);
-  border-left: 3px solid #5caec0;
-  border-radius: 12px;
-  background: #111a1d;
-}
-
-.ecdat-context-label span,
-.ecdat-context-detail span {
-  display: block;
-  color: #77adbb;
-  font-size: 13px;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
-}
-
-.ecdat-context-label strong {
-  display: block;
-  margin-top: 4px;
-  color: #e8eff0;
-  font-size: 16px;
-}
-
-.ecdat-context-detail {
-  display: grid;
-  gap: 4px;
-  min-width: 0;
-  flex: 1;
-}
-
-.ecdat-context-detail span {
-  overflow: hidden;
-  color: #a3a8aa;
-  font-size: 14px;
-  letter-spacing: 0;
-  text-overflow: ellipsis;
-  text-transform: none;
-  white-space: nowrap;
-}
-
-.ecdat-context-indicator button {
-  padding: 7px 9px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 7px;
-  background: transparent;
-  color: #aab3b5;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.ecdat-context-indicator button:hover {
-  border-color: #6dbdcc;
-  color: #f2f7f7;
-}
-
-.inventory-row.context-selected {
-  background: rgba(76, 149, 163, 0.14);
-  box-shadow: inset 3px 0 0 #6bc2d0;
-}
-
-@media (max-width: 680px) {
-  .global-search-container kbd {
-    display: none;
-  }
-
-  .ecdat-context-indicator {
-    align-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  .ecdat-context-detail {
-    width: 100%;
-    order: 3;
-  }
-}
-
-/* Quantum-era scenario analysis */
-.quantum-era-scenario {
-  padding: 20px 22px;
-  background: #111923;
-}
-
-.quantum-era-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-}
-
-.quantum-era-heading-wrap {
-  min-width: 0;
-}
-
-.quantum-era-heading-wrap h2 {
+body {
   margin: 0;
-  color: #e8edf5;
-  font-size: 16px;
+  min-width: 320px;
+  min-height: 100vh;
+  background: #191919;
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-.quantum-era-heading-wrap p {
-  margin: 6px 0 0;
-  color: #7e8b9d;
-  font-size: 14px;
+#root {
+  min-height: 100vh;
 }
+===== frontend/src/services/api.js =====
+const API_BASE_URL =
+  "http://127.0.0.1:8000";
 
-.quantum-era-selector {
-  display: flex;
-  flex: 0 0 auto;
-  flex-direction: column;
-  gap: 6px;
-  color: #8795a8;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.6px;
-  text-transform: uppercase;
-}
 
-.quantum-era-selector-controls {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
+/* ============================================================
+   SCAN FILE
+   ============================================================ */
 
-.quantum-era-selector select,
-.quantum-era-selector input {
-  width: 110px;
-  min-height: 34px;
-  padding: 7px 9px;
-  border: 1px solid #3b4d64;
-  border-radius: 7px;
-  outline: none;
-  background: #151f2c;
-  color: #e4eaf3;
-  font: inherit;
-  font-size: 16px;
-}
-
-.quantum-era-selector input {
-  width: 90px;
-}
-
-.quantum-era-risk-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 9px;
-  margin-top: 16px;
-}
-
-.quantum-era-risk-card {
-  min-height: 126px;
-  padding: 15px 16px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  border: 1px solid #33445c;
-  border-radius: 9px;
-  background: #151e2b;
-}
-
-.quantum-era-risk-card > span,
-.quantum-era-risk-card > strong,
-.quantum-era-risk-card > small {
-  display: block;
-}
-
-.quantum-era-risk-card > span {
-  color: #bcd0ff;
-  font-size: 14px;
-  font-weight: 750;
-  letter-spacing: 0.08em;
-}
-
-.quantum-era-risk-card > strong {
-  margin-top: 16px;
-  color: #dce7ff;
-  font-size: 25px;
-  line-height: 1;
-}
-
-.quantum-era-risk-card > small {
-  margin-top: 8px;
-  color: #93a5bf;
-  font-size: 16px;
-}
-
-.quantum-era-risk-card.critical {
-  border-color: #713943;
-  background: #321e29;
-}
-
-.quantum-era-risk-card.critical > span,
-.quantum-era-risk-card.critical > strong {
-  color: #ff8a91;
-}
-
-.quantum-era-risk-card.high {
-  border-color: #71512f;
-  background: #332719;
-}
-
-.quantum-era-risk-card.high > span,
-.quantum-era-risk-card.high > strong {
-  color: #ffc17c;
-}
-
-.quantum-era-risk-card.elevated > span,
-.quantum-era-risk-card.elevated > strong {
-  color: #e9d27e;
-}
-
-.quantum-era-risk-card.low {
-  border-color: #36546b;
-  background: #172936;
-}
-
-.quantum-era-risk-card.low > span,
-.quantum-era-risk-card.low > strong {
-  color: #8fc7e8;
-}
-
-.quantum-era-risk-card.normal > span,
-.quantum-era-risk-card.normal > strong {
-  color: #8fd5ad;
-}
-
-.quantum-era-risk-card.exposure > span,
-.quantum-era-risk-card.exposure > strong {
-  color: #9fd1e5;
-}
-
-.quantum-era-risk-card.quantum > span,
-.quantum-era-risk-card.quantum > strong {
-  color: #8fc7e8;
-}
-
-.quantum-era-risk-card.legacy > span,
-.quantum-era-risk-card.legacy > strong {
-  color: #d8c27f;
-}
-
-@media (max-width: 560px) {
-  .quantum-era-header {
-    align-items: stretch;
-    flex-direction: column;
+export async function scanFile(file) {
+  if (!file) {
+    throw new Error(
+      "No file selected."
+    );
   }
 
-  .quantum-era-selector {
-    width: 100%;
+  const formData =
+    new FormData();
+
+  formData.append(
+    "file",
+    file
+  );
+
+  let response;
+
+  try {
+    response = await fetch(
+      `${API_BASE_URL}/scan`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+  } catch {
+    throw new Error(
+      "Cannot connect to the ECDAT backend. Make sure the backend is running and the API URL is correct."
+    );
   }
 
-  .quantum-era-selector-controls {
-    width: 100%;
+
+  /* ----------------------------------------------------------
+     BACKEND ERROR
+     ---------------------------------------------------------- */
+
+  if (!response.ok) {
+    let message =
+      "ECDAT scan failed.";
+
+    try {
+      const errorData =
+        await response.json();
+
+      if (
+        errorData?.detail
+      ) {
+        message = String(
+          errorData.detail
+        );
+      }
+    } catch {
+      // Keep default error message.
+    }
+
+    throw new Error(
+      message
+    );
   }
 
-  .quantum-era-selector select {
-    width: 100%;
-  }
 
-  .quantum-era-risk-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  /* ----------------------------------------------------------
+     SCAN RESPONSE
+     ---------------------------------------------------------- */
+
+  try {
+    return await response.json();
+  } catch {
+    throw new Error(
+      "ECDAT returned an invalid scan response."
+    );
   }
 }
+
+
+/* ============================================================
+   PDF REPORT
+   ============================================================
+
+   The local backend does not expose a PDF endpoint. The
+   browser print dialog can still save the report as a PDF.
+   ============================================================ */
+
+export async function generatePdfReport() {
+  if (
+    typeof window ===
+      "undefined" ||
+    typeof window.print !==
+      "function"
+  ) {
+    throw new Error(
+      "PDF export is only available in a browser."
+    );
+  }
+
+
+  const previousTitle =
+    document.title;
+
+  document.title =
+    "ecdat-scan-report";
+
+
+  try {
+    window.print();
+  } finally {
+    document.title =
+      previousTitle;
+  }
+}
+
+===== backend/app.py =====
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from typing import Any, Dict
+from zipfile import BadZipFile, ZipFile, is_zipfile
+import tarfile
+
+from fastapi import (
+    FastAPI,
+    File,
+    HTTPException,
+    UploadFile,
+)
+from fastapi.middleware.cors import CORSMiddleware
+
+from scanner.file_detector import detect_file_type
+from scanner.scanner import scan_directory
+
+
+BASE_DIR = Path(__file__).resolve().parent
+
+UPLOADS_DIR = BASE_DIR / "uploads"
+REPORTS_DIR = BASE_DIR / "reports"
+
+UPLOADS_DIR.mkdir(
+    parents=True,
+    exist_ok=True,
+)
+
+REPORTS_DIR.mkdir(
+    parents=True,
+    exist_ok=True,
+)
+
+
+app = FastAPI(
+    title="ECDAT API",
+    version="0.2.0",
+    description=(
+        "Cryptographic Discovery, "
+        "CBOM Analysis and Quantum Risk Assessment API"
+    ),
+)
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5174",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+def safe_zip_extract(
+    archive_path: Path,
+    destination: Path,
+) -> None:
+    with ZipFile(
+        archive_path,
+        "r",
+    ) as archive:
+        destination_root = destination.resolve()
+
+        for member in archive.infolist():
+            target = (
+                destination
+                / member.filename
+            ).resolve()
+
+            if not str(target).startswith(
+                str(destination_root)
+            ):
+                raise HTTPException(
+                    status_code=400,
+                    detail=(
+                        "Unsafe archive path detected."
+                    ),
+                )
+
+        archive.extractall(
+            destination
+        )
+
+
+def safe_tar_extract(
+    archive_path: Path,
+    destination: Path,
+) -> None:
+    destination_root = destination.resolve()
+
+    with tarfile.open(
+        archive_path,
+        "r:*",
+    ) as archive:
+        for member in archive.getmembers():
+            target = (
+                destination
+                / member.name
+            ).resolve()
+
+            if not str(target).startswith(
+                str(destination_root)
+            ):
+                raise HTTPException(
+                    status_code=400,
+                    detail=(
+                        "Unsafe archive path detected."
+                    ),
+                )
+
+        archive.extractall(
+            destination
+        )
+
+
+async def save_upload_file(
+    upload: UploadFile,
+    destination: Path,
+) -> int:
+    total_size = 0
+
+    with destination.open(
+        "wb"
+    ) as output:
+        while True:
+            chunk = await upload.read(
+                1024 * 1024
+            )
+
+            if not chunk:
+                break
+
+            total_size += len(chunk)
+            output.write(chunk)
+
+    return total_size
+
+
+@app.get("/")
+def root() -> Dict[str, Any]:
+    return {
+        "name": "ECDAT API",
+        "status": "running",
+        "version": "0.2.0",
+    }
+
+
+@app.get("/health")
+def health() -> Dict[str, str]:
+    return {
+        "status": "healthy",
+    }
+
+
+@app.post("/scan")
+async def scan_file(
+    file: UploadFile = File(...),
+) -> Dict[str, Any]:
+    if not file.filename:
+        raise HTTPException(
+            status_code=400,
+            detail="No filename was provided.",
+        )
+
+    original_name = Path(
+        file.filename
+    ).name
+
+    with TemporaryDirectory(
+        prefix="ecdat_scan_"
+    ) as temporary_directory:
+        temp_root = Path(
+            temporary_directory
+        )
+
+        uploaded_file = (
+            temp_root / original_name
+        )
+
+        size = await save_upload_file(
+            file,
+            uploaded_file,
+        )
+
+        if size == 0:
+            raise HTTPException(
+                status_code=400,
+                detail="The uploaded file is empty.",
+            )
+
+        input_type = detect_file_type(
+            uploaded_file
+        )
+
+        scan_root = temp_root / "scan"
+
+        scan_root.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
+
+        try:
+            if is_zipfile(
+                uploaded_file
+            ):
+                safe_zip_extract(
+                    uploaded_file,
+                    scan_root,
+                )
+
+            elif tarfile.is_tarfile(
+                uploaded_file
+            ):
+                safe_tar_extract(
+                    uploaded_file,
+                    scan_root,
+                )
+
+            else:
+                target = (
+                    scan_root
+                    / original_name
+                )
+
+                target.write_bytes(
+                    uploaded_file.read_bytes()
+                )
+
+        except BadZipFile:
+            raise HTTPException(
+                status_code=400,
+                detail="The uploaded ZIP file is invalid.",
+            )
+
+        except tarfile.TarError:
+            raise HTTPException(
+                status_code=400,
+                detail="The uploaded TAR archive is invalid.",
+            )
+
+        result = scan_directory(
+            scan_root
+        )
+
+        result["input"] = {
+            "name": original_name,
+            "type": input_type,
+            "size": size,
+        }
+
+        return result
+
+===== backend/scanner/scanner.py =====
+import ssl
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+from .crypto_rules import CRYPTO_RULES
+from .file_detector import detect_file_type
+
+
+MAX_TEXT_FILE_SIZE = 10 * 1024 * 1024
+
+
+def read_text_safely(
+    file_path: Path,
+) -> Optional[str]:
+    try:
+        if file_path.stat().st_size > MAX_TEXT_FILE_SIZE:
+            return None
+
+        return file_path.read_text(
+            encoding="utf-8",
+            errors="ignore",
+        )
+    except (OSError, UnicodeError):
+        return None
+
+
+def detect_pem_type(
+    content: str,
+) -> Optional[str]:
+    labels = [
+        "BEGIN CERTIFICATE",
+        "BEGIN PRIVATE KEY",
+        "BEGIN ENCRYPTED PRIVATE KEY",
+        "BEGIN RSA PRIVATE KEY",
+        "BEGIN EC PRIVATE KEY",
+        "BEGIN DSA PRIVATE KEY",
+        "BEGIN PUBLIC KEY",
+        "BEGIN RSA PUBLIC KEY",
+        "BEGIN OPENSSH PRIVATE KEY",
+    ]
+
+    for label in labels:
+        if label in content:
+            return label
+
+    return None
+
+
+def inspect_real_crypto_file(
+    file_path: Path,
+    relative_path: str,
+    file_type: str,
+) -> List[Dict[str, Any]]:
+    """
+    Inspect actual certificate/key files without
+    exposing private-key contents.
+    """
+
+    artifacts = []
+
+    if file_type != "certificate/key":
+        return artifacts
+
+    try:
+        raw = file_path.read_bytes()
+
+        sample = raw[:2 * 1024 * 1024].decode(
+            "latin-1",
+            errors="ignore",
+        )
+
+    except OSError:
+        return artifacts
+
+    pem_type = detect_pem_type(sample)
+
+    if pem_type == "BEGIN CERTIFICATE":
+        metadata = {}
+
+        try:
+            metadata = ssl._ssl._test_decode_cert(
+                str(file_path)
+            )
+        except Exception:
+            metadata = {}
+
+        subject = metadata.get(
+            "subject",
+            "Unknown subject",
+        )
+
+        issuer = metadata.get(
+            "issuer",
+            "Unknown issuer",
+        )
+
+        not_after = metadata.get(
+            "notAfter",
+            "Unknown expiry",
+        )
+
+        usage = (
+            "X.509 certificate"
+            f" | Subject: {subject}"
+            f" | Issuer: {issuer}"
+            f" | Expiry: {not_after}"
+        )
+
+        artifacts.append(
+            {
+                "file": relative_path,
+                "line": 1,
+                "code": "Certificate body hidden",
+                "algorithm": "X.509 Certificate",
+                "algorithm_family": "PKI",
+                "category": "Certificate",
+                "usage": usage,
+                "quantum_status": "REVIEW",
+                "risk": "MEDIUM",
+                "recommendation": (
+                    "Inventory the certificate's public-key "
+                    "algorithm and plan PQC or hybrid "
+                    "certificate migration where required."
+                ),
+            }
+        )
+
+        return artifacts
+
+    if pem_type in {
+        "BEGIN RSA PRIVATE KEY",
+        "BEGIN ENCRYPTED PRIVATE KEY",
+    }:
+        artifacts.append(
+            {
+                "file": relative_path,
+                "line": 1,
+                "code": "Private key material detected; content hidden",
+                "algorithm": "RSA Private Key",
+                "algorithm_family": "RSA",
+                "category": "Private Key",
+                "usage": "Private-key material",
+                "quantum_status": "VULNERABLE",
+                "risk": "CRITICAL",
+                "recommendation": (
+                    "Protect the key material and plan "
+                    "migration to a PQC or hybrid signature "
+                    "and key-establishment architecture."
+                ),
+            }
+        )
+
+        return artifacts
+
+    if pem_type == "BEGIN EC PRIVATE KEY":
+        artifacts.append(
+            {
+                "file": relative_path,
+                "line": 1,
+                "code": "Private key material detected; content hidden",
+                "algorithm": "EC Private Key",
+                "algorithm_family": "Elliptic Curve",
+                "category": "Private Key",
+                "usage": "Elliptic-curve private-key material",
+                "quantum_status": "VULNERABLE",
+                "risk": "CRITICAL",
+                "recommendation": (
+                    "Plan migration to ML-DSA or a hybrid "
+                    "signature architecture."
+                ),
+            }
+        )
+
+        return artifacts
+
+    if pem_type == "BEGIN DSA PRIVATE KEY":
+        artifacts.append(
+            {
+                "file": relative_path,
+                "line": 1,
+                "code": "Private key material detected; content hidden",
+                "algorithm": "DSA Private Key",
+                "algorithm_family": "DSA",
+                "category": "Private Key",
+                "usage": "DSA private-key material",
+                "quantum_status": "VULNERABLE",
+                "risk": "CRITICAL",
+                "recommendation": (
+                    "Plan migration toward ML-DSA."
+                ),
+            }
+        )
+
+        return artifacts
+
+    if pem_type == "BEGIN OPENSSH PRIVATE KEY":
+        artifacts.append(
+            {
+                "file": relative_path,
+                "line": 1,
+                "code": "OpenSSH private-key material detected; content hidden",
+                "algorithm": "OpenSSH Private Key",
+                "algorithm_family": "SSH",
+                "category": "Private Key",
+                "usage": "SSH private-key material",
+                "quantum_status": "REVIEW",
+                "risk": "HIGH",
+                "recommendation": (
+                    "Identify the underlying SSH public-key "
+                    "algorithm and plan an appropriate PQC "
+                    "or hybrid migration."
+                ),
+            }
+        )
+
+        return artifacts
+
+    if pem_type in {
+        "BEGIN PUBLIC KEY",
+        "BEGIN RSA PUBLIC KEY",
+    }:
+        artifacts.append(
+            {
+                "file": relative_path,
+                "line": 1,
+                "code": "Public key detected",
+                "algorithm": "Public Key",
+                "algorithm_family": "PKI",
+                "category": "Public Key",
+                "usage": "Public-key material",
+                "quantum_status": "REVIEW",
+                "risk": "MEDIUM",
+                "recommendation": (
+                    "Identify the public-key algorithm and "
+                    "evaluate PQC or hybrid migration."
+                ),
+            }
+        )
+
+    return artifacts
+
+
+def find_crypto_artifacts(
+    file_path: Path,
+    relative_path: str,
+) -> List[Dict[str, Any]]:
+    artifacts = []
+
+    file_type = detect_file_type(
+        file_path
+    )
+
+    real_crypto_artifacts = (
+        inspect_real_crypto_file(
+            file_path=file_path,
+            relative_path=relative_path,
+            file_type=file_type,
+        )
+    )
+
+    artifacts.extend(
+        real_crypto_artifacts
+    )
+
+    content = read_text_safely(
+        file_path
+    )
+
+    if content is None:
+        return artifacts
+
+    lines = content.splitlines()
+
+    for rule in CRYPTO_RULES:
+        matched_lines = set()
+
+        for line_number, line in enumerate(
+            lines,
+            start=1,
+        ):
+            lower_line = line.lower()
+
+            for pattern in rule[
+                "patterns"
+            ]:
+                if pattern.lower() in lower_line:
+                    matched_lines.add(
+                        line_number
+                    )
+                    break
+
+        for line_number in sorted(
+            matched_lines
+        ):
+            source_line = (
+                lines[line_number - 1]
+                .strip()
+            )
+
+            artifact = {
+                "file": relative_path,
+                "line": line_number,
+                "code": source_line[:500],
+                "algorithm": rule[
+                    "algorithm"
+                ],
+                "algorithm_family": rule[
+                    "family"
+                ],
+                "category": rule[
+                    "category"
+                ],
+                "usage": rule[
+                    "usage"
+                ],
+                "quantum_status": rule[
+                    "quantum_status"
+                ],
+                "risk": rule[
+                    "risk"
+                ],
+                "recommendation": rule[
+                    "recommendation"
+                ],
+            }
+
+            duplicate = any(
+                existing["file"]
+                == artifact["file"]
+                and existing["line"]
+                == artifact["line"]
+                and existing["algorithm"]
+                == artifact[
+                    "algorithm"
+                ]
+                for existing in artifacts
+            )
+
+            if not duplicate:
+                artifacts.append(
+                    artifact
+                )
+
+    return artifacts
+
+
+def create_summary(
+    files: List[Dict[str, Any]],
+    artifacts: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    critical = sum(
+        1
+        for item in artifacts
+        if item.get("risk")
+        == "CRITICAL"
+    )
+
+    high = sum(
+        1
+        for item in artifacts
+        if item.get("risk")
+        == "HIGH"
+    )
+
+    medium = sum(
+        1
+        for item in artifacts
+        if item.get("risk")
+        == "MEDIUM"
+    )
+
+    low = sum(
+        1
+        for item in artifacts
+        if item.get("risk")
+        == "LOW"
+    )
+
+    quantum_vulnerable = sum(
+        1
+        for item in artifacts
+        if item.get(
+            "quantum_status"
+        )
+        == "VULNERABLE"
+    )
+
+    legacy_weak = sum(
+        1
+        for item in artifacts
+        if item.get(
+            "quantum_status"
+        )
+        == "LEGACY_WEAK"
+    )
+
+    if critical > 0:
+        posture = {
+            "key": "CRITICAL",
+            "label": "Highly Critical",
+            "description": (
+                "Immediate remediation is recommended. "
+                "Critical cryptographic findings are present."
+            ),
+        }
+    elif (
+        high > 0
+        or quantum_vulnerable > 0
+    ):
+        posture = {
+            "key": "HIGH",
+            "label": "High Risk",
+            "description": (
+                "Quantum-vulnerable or high-risk "
+                "cryptographic assets require migration planning."
+            ),
+        }
+    elif (
+        medium > 0
+        or legacy_weak > 0
+    ):
+        posture = {
+            "key": "ELEVATED",
+            "label": "Elevated",
+            "description": (
+                "Weak or legacy cryptography was identified "
+                "and should be reviewed."
+            ),
+        }
+    else:
+        posture = {
+            "key": "NORMAL",
+            "label": "Normal",
+            "description": (
+                "No critical or high-risk cryptographic "
+                "findings were identified by the scanner."
+            ),
+        }
+
+    return {
+        "files_scanned": len(files),
+        "crypto_assets": len(artifacts),
+        "critical": critical,
+        "high": high,
+        "medium": medium,
+        "low": low,
+        "quantum_vulnerable": quantum_vulnerable,
+        "legacy_weak": legacy_weak,
+        "security_posture": posture,
+    }
+
+
+def scan_directory(
+    root_directory: Path,
+) -> Dict[str, Any]:
+    files = []
+    artifacts = []
+
+    for file_path in sorted(
+        root_directory.rglob("*")
+    ):
+        if not file_path.is_file():
+            continue
+
+        try:
+            relative_path = (
+                file_path
+                .relative_to(
+                    root_directory
+                )
+                .as_posix()
+            )
+
+            file_type = detect_file_type(
+                file_path
+            )
+
+            size = file_path.stat().st_size
+
+        except OSError:
+            continue
+
+        files.append(
+            {
+                "name": file_path.name,
+                "path": relative_path,
+                "type": file_type,
+                "size": size,
+            }
+        )
+
+        detected = find_crypto_artifacts(
+            file_path=file_path,
+            relative_path=relative_path,
+        )
+
+        artifacts.extend(
+            detected
+        )
+
+    return {
+        "summary": create_summary(
+            files,
+            artifacts,
+        ),
+        "files": files,
+        "artifacts": artifacts,
+    }
+===== backend/scanner/file_detector.py =====
+from pathlib import Path
+
+
+SOURCE_EXTENSIONS = {
+    ".java",
+    ".py",
+    ".js",
+    ".jsx",
+    ".ts",
+    ".tsx",
+    ".c",
+    ".h",
+    ".cc",
+    ".cpp",
+    ".cxx",
+    ".hpp",
+    ".go",
+    ".rs",
+    ".rb",
+    ".php",
+    ".swift",
+    ".kt",
+    ".kts",
+    ".scala",
+    ".cs",
+    ".m",
+    ".mm",
+    ".sh",
+    ".bash",
+    ".zsh",
+    ".sql",
+    ".dart",
+    ".ex",
+    ".exs",
+    ".erl",
+    ".fs",
+    ".fsx",
+}
+
+CONFIG_EXTENSIONS = {
+    ".json",
+    ".yaml",
+    ".yml",
+    ".toml",
+    ".ini",
+    ".cfg",
+    ".conf",
+    ".properties",
+    ".xml",
+    ".env",
+    ".cnf",
+}
+
+CERTIFICATE_KEY_EXTENSIONS = {
+    ".pem",
+    ".crt",
+    ".cer",
+    ".der",
+    ".key",
+    ".csr",
+    ".p12",
+    ".pfx",
+    ".jks",
+    ".p7b",
+    ".p7c",
+}
+
+ARCHIVE_EXTENSIONS = {
+    ".zip",
+    ".tar",
+    ".gz",
+    ".tgz",
+    ".bz2",
+    ".xz",
+    ".7z",
+    ".rar",
+}
+
+LIBRARY_EXTENSIONS = {
+    ".jar",
+    ".war",
+    ".ear",
+    ".aar",
+    ".whl",
+    ".egg",
+}
+
+BINARY_EXTENSIONS = {
+    ".exe",
+    ".dll",
+    ".so",
+    ".dylib",
+    ".bin",
+    ".elf",
+    ".app",
+    ".out",
+    ".o",
+    ".a",
+}
+
+CONTAINER_NAMES = {
+    "dockerfile",
+    "containerfile",
+    "docker-compose.yml",
+    "docker-compose.yaml",
+}
+
+
+def detect_file_type(file_path: Path) -> str:
+    """
+    Classify a file without assuming that it is
+    source code.
+
+    Returns one of:
+        source/code
+        configuration
+        certificate/key
+        archive
+        container
+        library
+        binary/unknown
+    """
+
+    name = file_path.name.lower()
+    suffix = file_path.suffix.lower()
+
+    if name in CONTAINER_NAMES:
+        return "container"
+
+    if (
+        name.startswith("dockerfile")
+        or name.startswith("containerfile")
+    ):
+        return "container"
+
+    if suffix in SOURCE_EXTENSIONS:
+        return "source/code"
+
+    if suffix in CONFIG_EXTENSIONS:
+        return "configuration"
+
+    if suffix in CERTIFICATE_KEY_EXTENSIONS:
+        return "certificate/key"
+
+    if suffix in ARCHIVE_EXTENSIONS:
+        return "archive"
+
+    if suffix in LIBRARY_EXTENSIONS:
+        return "library"
+
+    if suffix in BINARY_EXTENSIONS:
+        return "binary/unknown"
+
+    return "binary/unknown"
+===== backend/scanner/crypto_rules.py =====
+CRYPTO_RULES = [
+    # =========================================================
+    # POST-QUANTUM / CURRENT
+    # =========================================================
+
+    {
+        "algorithm": "ML-DSA",
+        "family": "Post-Quantum Signature",
+        "category": "Signature",
+        "usage": "Post-quantum digital signature",
+        "patterns": [
+            "ML-DSA",
+            "MLDSA",
+            "Dilithium",
+        ],
+        "quantum_status": "NOT_CURRENTLY_QUANTUM_VULNERABLE",
+        "risk": "LOW",
+        "recommendation": "Retain current PQC deployment and monitor implementation maturity.",
+    },
+    {
+        "algorithm": "ML-KEM",
+        "family": "Post-Quantum KEM",
+        "category": "Key Establishment",
+        "usage": "Post-quantum key encapsulation",
+        "patterns": [
+            "ML-KEM",
+            "MLKEM",
+            "Kyber",
+        ],
+        "quantum_status": "NOT_CURRENTLY_QUANTUM_VULNERABLE",
+        "risk": "LOW",
+        "recommendation": "Suitable PQC direction for key establishment; evaluate hybrid deployment where required.",
+    },
+    {
+        "algorithm": "SLH-DSA",
+        "family": "Post-Quantum Signature",
+        "category": "Signature",
+        "usage": "Post-quantum stateless hash-based signature",
+        "patterns": [
+            "SLH-DSA",
+            "SLHDSA",
+            "SPHINCS",
+        ],
+        "quantum_status": "NOT_CURRENTLY_QUANTUM_VULNERABLE",
+        "risk": "LOW",
+        "recommendation": "Retain current PQC deployment and assess operational requirements.",
+    },
+
+    # =========================================================
+    # RSA
+    # =========================================================
+
+    {
+        "algorithm": "RSA-2048",
+        "family": "RSA",
+        "category": "Public-Key",
+        "usage": "RSA encryption/signature/key generation",
+        "patterns": [
+            "RSA-2048",
+            "RSA2048",
+            "RSA/ECB",
+            "RSA/ECB/PKCS1Padding",
+            "generateKeyPair",
+            "KeyPairGenerator.getInstance(\"RSA\")",
+            "KeyPairGenerator.getInstance('RSA')",
+            "getInstance(\"RSA\")",
+            "getInstance('RSA')",
+            "RSA PRIVATE KEY",
+        ],
+        "quantum_status": "VULNERABLE",
+        "risk": "CRITICAL",
+        "recommendation": "Prioritize migration to ML-DSA for signatures and ML-KEM or a hybrid design for key establishment.",
+    },
+    {
+        "algorithm": "RSA",
+        "family": "RSA",
+        "category": "Public-Key",
+        "usage": "RSA cryptographic operation",
+        "patterns": [
+            "RSA",
+            "rsa_private_key",
+            "rsa_public_key",
+        ],
+        "quantum_status": "VULNERABLE",
+        "risk": "CRITICAL",
+        "recommendation": "Plan PQC or hybrid migration. Prefer ML-DSA for signatures and ML-KEM for key establishment.",
+    },
+
+    # =========================================================
+    # ECC / ECDSA / ECDH
+    # =========================================================
+
+    {
+        "algorithm": "ECDSA",
+        "family": "Elliptic Curve",
+        "category": "Signature",
+        "usage": "Elliptic-curve digital signature",
+        "patterns": [
+            "ECDSA",
+            "EC PRIVATE KEY",
+            "ECPrivateKey",
+        ],
+        "quantum_status": "VULNERABLE",
+        "risk": "CRITICAL",
+        "recommendation": "Plan migration to ML-DSA or a hybrid signature strategy.",
+    },
+    {
+        "algorithm": "ECDH",
+        "family": "Elliptic Curve",
+        "category": "Key Establishment",
+        "usage": "Elliptic-curve key agreement",
+        "patterns": [
+            "ECDH",
+            "KeyAgreement.getInstance(\"ECDH\")",
+            "KeyAgreement.getInstance('ECDH')",
+        ],
+        "quantum_status": "VULNERABLE",
+        "risk": "CRITICAL",
+        "recommendation": "Plan migration to ML-KEM or a hybrid key-establishment mechanism.",
+    },
+    {
+        "algorithm": "EC",
+        "family": "Elliptic Curve",
+        "category": "Public-Key",
+        "usage": "Elliptic-curve cryptography",
+        "patterns": [
+            "ECGenParameterSpec",
+            "secp256r1",
+            "secp384r1",
+            "secp521r1",
+            "prime256v1",
+            "P-256",
+            "P-384",
+            "P-521",
+        ],
+        "quantum_status": "VULNERABLE",
+        "risk": "HIGH",
+        "recommendation": "Assess role and migrate ECC signatures/key establishment toward PQC or hybrid mechanisms.",
+    },
+    {
+        "algorithm": "Ed25519",
+        "family": "EdDSA",
+        "category": "Signature",
+        "usage": "Elliptic-curve digital signature",
+        "patterns": [
+            "Ed25519",
+            "ED25519",
+        ],
+        "quantum_status": "VULNERABLE",
+        "risk": "CRITICAL",
+        "recommendation": "Evaluate ML-DSA or a hybrid signature migration path.",
+    },
+    {
+        "algorithm": "X25519",
+        "family": "Elliptic Curve",
+        "category": "Key Establishment",
+        "usage": "Elliptic-curve key agreement",
+        "patterns": [
+            "X25519",
+            "x25519",
+        ],
+        "quantum_status": "VULNERABLE",
+        "risk": "CRITICAL",
+        "recommendation": "Evaluate ML-KEM or a hybrid key-establishment migration path.",
+    },
+
+    # =========================================================
+    # DSA / DH
+    # =========================================================
+
+    {
+        "algorithm": "DSA",
+        "family": "Finite-Field Public-Key",
+        "category": "Signature",
+        "usage": "Digital signature",
+        "patterns": [
+            "DSA",
+            "DSA PRIVATE KEY",
+        ],
+        "quantum_status": "VULNERABLE",
+        "risk": "CRITICAL",
+        "recommendation": "Migrate toward ML-DSA or a hybrid signature mechanism.",
+    },
+    {
+        "algorithm": "Diffie-Hellman",
+        "family": "Finite-Field Public-Key",
+        "category": "Key Establishment",
+        "usage": "Diffie-Hellman key exchange",
+        "patterns": [
+            "DiffieHellman",
+            "Diffie-Hellman",
+            "DHParameterSpec",
+            "DH PRIVATE KEY",
+        ],
+        "quantum_status": "VULNERABLE",
+        "risk": "CRITICAL",
+        "recommendation": "Migrate toward ML-KEM or a hybrid key-establishment mechanism.",
+    },
+
+    # =========================================================
+    # SYMMETRIC
+    # =========================================================
+
+    {
+        "algorithm": "AES",
+        "family": "AES",
+        "category": "Symmetric",
+        "usage": "Symmetric encryption",
+        "patterns": [
+            "AES",
+            "AES/GCM",
+            "AES/CBC",
+            "AES/CTR",
+        ],
+        "quantum_status": "NOT_CURRENTLY_QUANTUM_VULNERABLE",
+        "risk": "LOW",
+        "recommendation": "Continue using appropriately sized AES keys and authenticated encryption where possible.",
+    },
+    {
+        "algorithm": "ChaCha20",
+        "family": "ChaCha",
+        "category": "Symmetric",
+        "usage": "Symmetric encryption",
+        "patterns": [
+            "ChaCha20",
+            "CHACHA20",
+        ],
+        "quantum_status": "NOT_CURRENTLY_QUANTUM_VULNERABLE",
+        "risk": "LOW",
+        "recommendation": "Continue current deployment while reviewing key-size and implementation requirements.",
+    },
+
+    # =========================================================
+    # WEAK / LEGACY
+    # =========================================================
+
+    {
+        "algorithm": "3DES",
+        "family": "Triple DES",
+        "category": "Symmetric",
+        "usage": "Legacy symmetric encryption",
+        "patterns": [
+            "3DES",
+            "DESede",
+            "TripleDES",
+        ],
+        "quantum_status": "LEGACY_WEAK",
+        "risk": "CRITICAL",
+        "recommendation": "Replace with modern authenticated encryption such as AES-GCM or an approved alternative.",
+    },
+    {
+        "algorithm": "DES",
+        "family": "DES",
+        "category": "Symmetric",
+        "usage": "Legacy symmetric encryption",
+        "patterns": [
+            "DES",
+            "DES/CBC",
+            "DES/ECB",
+        ],
+        "quantum_status": "LEGACY_WEAK",
+        "risk": "CRITICAL",
+        "recommendation": "Remove DES and migrate to modern symmetric encryption.",
+    },
+    {
+        "algorithm": "RC4",
+        "family": "RC4",
+        "category": "Symmetric",
+        "usage": "Legacy stream encryption",
+        "patterns": [
+            "RC4",
+            "ARCFOUR",
+        ],
+        "quantum_status": "LEGACY_WEAK",
+        "risk": "CRITICAL",
+        "recommendation": "Remove RC4 and migrate to a modern authenticated encryption mechanism.",
+    },
+    {
+        "algorithm": "MD5",
+        "family": "MD",
+        "category": "Hash",
+        "usage": "Legacy cryptographic hash",
+        "patterns": [
+            "MD5",
+            "MessageDigest.getInstance(\"MD5\")",
+            "MessageDigest.getInstance('MD5')",
+        ],
+        "quantum_status": "LEGACY_WEAK",
+        "risk": "HIGH",
+        "recommendation": "Replace MD5 with an approved modern hash such as SHA-256 or stronger.",
+    },
+    {
+        "algorithm": "SHA-1",
+        "family": "SHA",
+        "category": "Hash",
+        "usage": "Legacy cryptographic hash",
+        "patterns": [
+            "SHA-1",
+            "SHA1",
+            "MessageDigest.getInstance(\"SHA-1\")",
+            "MessageDigest.getInstance('SHA-1')",
+        ],
+        "quantum_status": "LEGACY_WEAK",
+        "risk": "HIGH",
+        "recommendation": "Replace SHA-1 with SHA-256 or stronger approved hashes.",
+    },
+
+    # =========================================================
+    # PROTOCOLS
+    # =========================================================
+
+    {
+        "algorithm": "TLS 1.0",
+        "family": "TLS",
+        "category": "Protocol",
+        "usage": "Legacy transport security protocol",
+        "patterns": [
+            "TLSv1",
+            "TLS 1.0",
+            "TLSv1.0",
+        ],
+        "quantum_status": "REVIEW",
+        "risk": "HIGH",
+        "recommendation": "Disable legacy TLS versions and migrate toward modern TLS configurations.",
+    },
+    {
+        "algorithm": "TLS 1.1",
+        "family": "TLS",
+        "category": "Protocol",
+        "usage": "Legacy transport security protocol",
+        "patterns": [
+            "TLSv1.1",
+            "TLS 1.1",
+        ],
+        "quantum_status": "REVIEW",
+        "risk": "HIGH",
+        "recommendation": "Disable legacy TLS versions and migrate toward modern TLS configurations.",
+    },
+]
