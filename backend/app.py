@@ -200,6 +200,13 @@ def root() -> Dict[str, Any]:
     }
 
 
+@app.get("/cors-test")
+def cors_test() -> Dict[str, str]:
+    return {
+        "status": "ok",
+    }
+
+
 @app.get("/health")
 def health() -> Dict[str, str]:
     return {
