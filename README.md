@@ -254,9 +254,12 @@ About
 History
 ```
 
-### Step 2 — Select a File
+### Step 2 — Select an Upload
 
-The upload area accepts files without restricting the user to only `.zip` files.
+The homepage provides one unified upload/drop area and one **Upload / Select**
+button. It accepts a single file, multiple files, dragged folders/projects,
+and supported archives without creating separate file and folder workflows.
+Dropped project paths are preserved relative to the selected project root.
 
 Examples include:
 
@@ -270,6 +273,13 @@ Archives
 Binaries
 Container-related files
 ```
+
+Generated directories such as `node_modules`, `.git`, `dist`, `build`,
+`coverage`, `__pycache__`, `.venv`, `venv`, and `target` are ignored during
+folder traversal. Unsupported files remain part of the discovered inventory
+and are reported as skipped rather than causing the complete upload to fail.
+The configurable total upload limit is 500 MB, while individual text files
+larger than 10 MB are discovered but skipped for source-content analysis.
 
 ### Step 3 — Start Scan
 
@@ -816,3 +826,4 @@ npm run dev
 
 cd backend
 python -m uvicorn app:app --reload --port 8000
+# edcat
