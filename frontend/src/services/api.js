@@ -1,6 +1,5 @@
 const API_BASE_URL = (
-  import.meta.env.VITE_API_URL ||
-  (import.meta.env.DEV ? "http://127.0.0.1:8000" : "")
+  import.meta.env.VITE_API_URL || ""
 ).replace(/\/+$/, "");
 
 
@@ -40,11 +39,13 @@ export async function scanFile(scanInput) {
     client_skip_reason: entry.skipReason || "",
   }));
 
-  (input.files || []).forEach((entry) => {
-    if (entry.skipReason) return;
+  const uploadEntries = (input.files || []).filter(
+    (entry) => !entry.skipReason
+  );
 
+  uploadEntries.forEach((entry) => {
     formData.append(
-      "files",
+      uploadEntries.length === 1 ? "file" : "files",
       entry.file,
       entry.file.name
     );
@@ -72,10 +73,14 @@ export async function scanFile(scanInput) {
         body: formData,
       }
     );
-  } catch {
-    throw new Error(
-      "Cannot connect to the ECDAT backend. Make sure the backend is running and the API URL is correct."
-    );
+  } catch (error) {
+    if (error instanceof TypeError) {
+      throw new Error(
+        "Cannot connect to the ECDAT backend. The request may have been blocked by CORS, or the API URL may be unreachable."
+      );
+    }
+
+    throw error;
   }
 
 
