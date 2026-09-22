@@ -49,6 +49,116 @@ const CURRENT_SCAN_KEY =
 const HISTORY_KEY =
   "ecdatScanHistory";
 
+const PAGE_SIZE = 15;
+
+function getPaginationPages(
+  totalPages,
+  currentPage
+) {
+  if (totalPages <= 7) {
+    return Array.from(
+      { length: totalPages },
+      (_, index) => index + 1
+    );
+  }
+
+  const pages = [1];
+  const start = Math.max(2, currentPage - 1);
+  const end = Math.min(totalPages - 1, currentPage + 1);
+
+  if (start > 2) {
+    pages.push("ellipsis-start");
+  }
+
+  for (let page = start; page <= end; page += 1) {
+    pages.push(page);
+  }
+
+  if (end < totalPages - 1) {
+    pages.push("ellipsis-end");
+  }
+
+  pages.push(totalPages);
+  return pages;
+}
+
+function PaginationControls({
+  currentPage,
+  totalPages,
+  onPageChange,
+}) {
+  if (totalPages <= 1) {
+    return null;
+  }
+
+  return (
+    <nav
+      className="dashboard-pagination"
+      aria-label="Pagination"
+    >
+      <button
+        type="button"
+        disabled={currentPage === 1}
+        onClick={() =>
+          onPageChange(
+            Math.max(1, currentPage - 1)
+          )
+        }
+      >
+        Previous
+      </button>
+
+      <div className="dashboard-pagination-pages">
+        {getPaginationPages(
+          totalPages,
+          currentPage
+        ).map((page) =>
+          typeof page === "number" ? (
+            <button
+              type="button"
+              className={
+                page === currentPage
+                  ? "active"
+                  : ""
+              }
+              aria-current={
+                page === currentPage
+                  ? "page"
+                  : undefined
+              }
+              key={page}
+              onClick={() =>
+                onPageChange(page)
+              }
+            >
+              {page}
+            </button>
+          ) : (
+            <span
+              className="dashboard-pagination-ellipsis"
+              key={page}
+            >
+              ...
+            </span>
+          )
+        )}
+      </div>
+
+      <button
+        type="button"
+        disabled={currentPage === totalPages}
+        onClick={() =>
+          onPageChange(
+            Math.min(totalPages, currentPage + 1)
+          )
+        }
+      >
+        Next
+      </button>
+    </nav>
+  );
+}
+
 
 /* ============================================================
    STORAGE
@@ -646,6 +756,16 @@ function Dashboard() {
   ] = useState("ALL");
 
   const [
+    assetPage,
+    setAssetPage,
+  ] = useState(1);
+
+  const [
+    recommendationPage,
+    setRecommendationPage,
+  ] = useState(1);
+
+  const [
     expandedArtifactIndex,
     setExpandedArtifactIndex,
   ] = useState(null);
@@ -985,6 +1105,30 @@ function Dashboard() {
       quantumFilter,
     ]);
 
+  const assetTotalPages =
+    Math.ceil(
+      filteredArtifacts.length / PAGE_SIZE
+    );
+
+  const effectiveAssetPage =
+    assetTotalPages > 0
+      ? Math.min(assetPage, assetTotalPages)
+      : 1;
+
+  const paginatedArtifacts =
+    useMemo(() => {
+      const start =
+        (effectiveAssetPage - 1) * PAGE_SIZE;
+
+      return filteredArtifacts.slice(
+        start,
+        start + PAGE_SIZE
+      );
+    }, [
+      effectiveAssetPage,
+      filteredArtifacts,
+    ]);
+
 
   /* ==========================================================
      RECOMMENDATION COUNTS
@@ -993,6 +1137,8 @@ function Dashboard() {
   const recommendations =
     useMemo(
       () => {
+        const seenFiles = new Set();
+
         return artifacts
           .map((artifact, index) => {
             const rawTargets =
@@ -1018,6 +1164,19 @@ function Dashboard() {
                 artifact.quantum_status === "LEGACY_WEAK"
               );
 
+            const fileKey =
+              artifact.file ||
+              artifactEntityId(artifact, index);
+
+            if (
+              !isActionable ||
+              seenFiles.has(fileKey)
+            ) {
+              return null;
+            }
+
+            seenFiles.add(fileKey);
+
             return isActionable
               ? {
                   artifact,
@@ -1037,6 +1196,34 @@ function Dashboard() {
       () => recommendations.length,
       [recommendations]
     );
+
+  const recommendationTotalPages =
+    Math.ceil(
+      recommendations.length / PAGE_SIZE
+    );
+
+  const effectiveRecommendationPage =
+    recommendationTotalPages > 0
+      ? Math.min(
+          recommendationPage,
+          recommendationTotalPages
+        )
+      : 1;
+
+  const paginatedRecommendations =
+    useMemo(() => {
+      const start =
+        (effectiveRecommendationPage - 1) * PAGE_SIZE;
+
+      return recommendations.slice(
+        start,
+        start + PAGE_SIZE
+      );
+    }, [
+      effectiveRecommendationPage,
+      recommendations,
+    ]);
+
 
 
   /* ==========================================================
@@ -2414,11 +2601,12 @@ function Dashboard() {
 
                   <input
                     value={searchTerm}
-                    onChange={(event) =>
+                    onChange={(event) => {
                       setSearchTerm(
                         event.target.value
-                      )
-                    }
+                      );
+                      setAssetPage(1);
+                    }}
                     placeholder="Search assets"
                   />
 
@@ -2433,11 +2621,12 @@ function Dashboard() {
                     value={
                       riskFilter
                     }
-                    onChange={(event) =>
+                    onChange={(event) => {
                       setRiskFilter(
                         event.target.value
-                      )
-                    }
+                      );
+                      setAssetPage(1);
+                    }}
                   >
 
                     <option value="ALL">
@@ -2475,11 +2664,12 @@ function Dashboard() {
                     value={
                       typeFilter
                     }
-                    onChange={(event) =>
+                    onChange={(event) => {
                       setTypeFilter(
                         event.target.value
-                      )
-                    }
+                      );
+                      setAssetPage(1);
+                    }}
                   >
 
                     <option value="ALL">
@@ -2520,11 +2710,12 @@ function Dashboard() {
                     value={
                       quantumFilter
                     }
-                    onChange={(event) =>
+                    onChange={(event) => {
                       setQuantumFilter(
                         event.target.value
-                      )
-                    }
+                      );
+                      setAssetPage(1);
+                    }}
                   >
 
                     <option value="ALL">
@@ -2618,7 +2809,7 @@ function Dashboard() {
 
                   ) : (
 
-                    filteredArtifacts.map(
+                    paginatedArtifacts.map(
                       (
                         artifact
                       ) => {
@@ -3283,18 +3474,29 @@ function Dashboard() {
               Showing{" "}
 
               <strong>
-                {
+                {filteredArtifacts.length
+                  ? (effectiveAssetPage - 1) * PAGE_SIZE + 1
+                  : 0}
+                –
+                {Math.min(
+                  effectiveAssetPage * PAGE_SIZE,
                   filteredArtifacts.length
-                }
+                )}
               </strong>
 
               {" "}of{" "}
 
               <strong>
-                {artifacts.length}
+                {filteredArtifacts.length}
               </strong>
 
-              {" "}findings
+              {" "}assets
+
+              <PaginationControls
+                currentPage={effectiveAssetPage}
+                totalPages={assetTotalPages}
+                onPageChange={setAssetPage}
+              />
 
             </div>
 
@@ -3340,7 +3542,7 @@ function Dashboard() {
               </div>
             ) : (
               <div className="recommendation-list">
-                {recommendations.map(
+                {paginatedRecommendations.map(
                   ({
                     artifact,
                     index,
@@ -3433,6 +3635,12 @@ function Dashboard() {
                 )}
               </div>
             )}
+
+            <PaginationControls
+              currentPage={effectiveRecommendationPage}
+              totalPages={recommendationTotalPages}
+              onPageChange={setRecommendationPage}
+            />
 
           </section>
 

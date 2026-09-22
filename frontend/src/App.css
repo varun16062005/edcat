@@ -2510,6 +2510,177 @@ button:disabled {
   color: #aaaab0;
 }
 
+.dashboard-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 16px;
+}
+
+.inventory-footer .dashboard-pagination {
+  margin-top: 0;
+}
+
+.dashboard-pagination button {
+  min-height: 31px;
+  padding: 0 10px;
+  border: 1px solid #313b48;
+  border-radius: 7px;
+  background: #1b2028;
+  color: #b3bbc5;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.dashboard-pagination button:hover:not(:disabled),
+.dashboard-pagination button.active {
+  background: #263550;
+  border-color: #49679d;
+  color: #eef3ff;
+}
+
+.dashboard-pagination button:disabled {
+  opacity: 0.45;
+}
+
+.dashboard-pagination-pages {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.dashboard-pagination-pages button {
+  min-width: 31px;
+  padding: 0 7px;
+}
+
+.dashboard-pagination-ellipsis {
+  padding: 0 2px;
+  color: #798594;
+}
+
+@media (max-width: 900px) {
+  .dashboard-main {
+    width: calc(100% - 94px);
+    margin-left: 94px;
+    padding-right: 14px;
+  }
+
+  .dashboard-content {
+    max-width: none;
+  }
+
+  .dashboard-two-column {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-topbar {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 64px;
+    padding: 10px 0;
+  }
+}
+
+@media (max-width: 650px) {
+  .dashboard-main {
+    width: 100%;
+    margin-left: 0;
+    padding: 0 12px 24px;
+  }
+
+  .dashboard-rail {
+    position: sticky;
+    top: 0;
+    left: auto;
+    bottom: auto;
+    width: 100%;
+    height: auto;
+    min-height: 62px;
+    border-radius: 0 0 16px 16px;
+    padding: 9px 12px;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .dashboard-logo-container {
+    width: 38px;
+    height: 38px;
+    margin-bottom: 0;
+  }
+
+  .dashboard-rail-nav {
+    flex-direction: row;
+    gap: 5px;
+    overflow-x: auto;
+  }
+
+  .dashboard-rail-item {
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
+  }
+
+  .dashboard-rail-bottom {
+    display: none;
+  }
+
+  .dashboard-search {
+    width: 100%;
+    order: 3;
+  }
+
+  .dashboard-title-mini {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .dashboard-top-posture {
+    margin-left: auto;
+  }
+
+  .dashboard-card {
+    padding: 18px 14px;
+  }
+
+  .dashboard-card-header {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .inventory-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    text-align: center;
+  }
+
+  .dashboard-pagination {
+    width: 100%;
+  }
+
+  .recommendation-row-heading,
+  .recommendation-row-details {
+    min-width: 0;
+  }
+
+  .recommendation-row-heading > div,
+  .recommendation-row-details > div {
+    min-width: 0;
+  }
+
+  .recommendation-row-heading span,
+  .recommendation-row-details strong,
+  .recommendation-primary-name {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+}
+
 
 /* =========================================================
    HISTORY

@@ -70,7 +70,8 @@ export async function scanFile(scanInput) {
   } catch (error) {
     if (error instanceof TypeError) {
       throw new Error(
-        "Cannot connect to the ECDAT backend. The request may have been blocked by CORS, or the API URL may be unreachable."
+        "Cannot connect to the ECDAT backend. The request may have been blocked by CORS, or the API URL may be unreachable.",
+        { cause: error }
       );
     }
 
