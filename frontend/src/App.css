@@ -7,9 +7,11 @@
 }
 
 html {
-  font-size: 16px;
+  /* Fluid font-size prevents "zoomed in" appearance on Windows / mid-range DPIs */
+  font-size: clamp(13px, 1.1vw, 16px);
   color-scheme: dark;
   background: #191919;
+  overflow-x: hidden;
 }
 
 html,
@@ -17,6 +19,9 @@ body,
 #root {
   min-width: 320px;
   min-height: 100%;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
   background: #191919;
 }
 
@@ -200,9 +205,9 @@ body {
   margin-left: 260px;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1280px) {
   .persistent-sidebar {
-    width: 68px;
+    width: 72px;
     padding: 14px 8px;
   }
 
@@ -217,7 +222,42 @@ body {
   }
 
   .persistent-shell-content {
-    margin-left: 92px;
+    margin-left: 96px;
+  }
+}
+
+@media (max-width: 640px) {
+  .persistent-sidebar {
+    position: fixed;
+    inset: auto 0 0 0;
+    width: 100%;
+    height: 60px;
+    border-radius: 16px 16px 0 0;
+    flex-direction: row;
+    justify-content: center;
+    padding: 6px 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .persistent-sidebar-logo {
+    display: none;
+  }
+
+  .persistent-nav-group {
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    margin-bottom: 0;
+  }
+
+  .persistent-nav-group > span {
+    display: none;
+  }
+
+  .persistent-shell-content {
+    margin-left: 0;
+    padding-bottom: 68px;
   }
 }
 
@@ -1345,6 +1385,31 @@ button:disabled {
   gap: 8px;
   align-items: center;
   font-size: 13.5px;
+}
+
+/* Warmup / connecting status banner */
+.upload-warmup-status {
+  margin-top: 10px;
+  border-radius: 10px;
+  padding: 10px 14px;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  color: #38bdf8;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 13px;
+  animation: warmupPulse 1.8s ease-in-out infinite;
+}
+
+.warmup-icon {
+  flex-shrink: 0;
+  animation: warmupPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes warmupPulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
 }
 
 .mini-spinner {
@@ -6639,6 +6704,8 @@ button:disabled {
 
 .dependency-tree-view {
   height: 600px;
+  min-height: 360px;
+  max-height: min(600px, 72vh);
   margin-top: 15px;
   border: 1px solid #2b3948;
   border-radius: 10px;
@@ -6669,6 +6736,7 @@ button:disabled {
   color: #aabbd8;
   font: inherit;
   cursor: pointer;
+  touch-action: manipulation;
 }
 
 .dependency-tree-controls button:hover {
@@ -13231,6 +13299,21 @@ body,
   .analysis-page-header {
     margin-bottom: 16px !important;
   }
+
+  .analysis-page-header,
+  .analysis-panel,
+  .analysis-metric-card,
+  .analysis-empty,
+  .dependency-view-heading {
+    min-width: 0;
+  }
+
+  .analysis-page-header > *,
+  .analysis-panel > *,
+  .dependency-view-heading > * {
+    min-width: 0;
+    max-width: 100%;
+  }
 }
 
 /* 2. DASHBOARD RESPONSIVENESS */
@@ -13531,8 +13614,31 @@ body,
 
 /* 9. TOPBAR BRANDING & SEARCH SHRINKING FOR NARROW VIEWPORTS */
 @media (max-width: 640px) {
+  .shell-topbar {
+    gap: 8px !important;
+    padding-inline: max(10px, env(safe-area-inset-left)) max(10px, env(safe-area-inset-right)) !important;
+  }
+
+  .shell-topbar-left {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .shell-topbar-actions {
+    flex: 0 0 auto;
+    gap: 6px;
+  }
+
+  .topbar-action-btn,
+  .topbar-hamburger-btn {
+    min-width: 36px;
+    min-height: 36px;
+  }
+
   .topbar-search-wrapper {
-    max-width: 130px !important;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 160px !important;
   }
 
   .breadcrumb-brand,
@@ -13545,7 +13651,28 @@ body,
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    max-width: 110px !important;
+    max-width: min(34vw, 140px) !important;
+  }
+
+  .dependency-tree-view {
+    height: min(560px, 68vh);
+    min-height: 340px;
+  }
+
+  .dependency-tree-controls {
+    justify-content: flex-start;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-inline: 8px;
+  }
+
+  .dependency-tree-controls button {
+    min-width: 36px;
+    min-height: 34px;
+  }
+
+  .dependency-tree-controls button:last-child {
+    white-space: nowrap;
   }
 }
 
@@ -13560,7 +13687,11 @@ body,
   }
 
   .breadcrumb-current-page {
-    max-width: 90px !important;
+    max-width: 28vw !important;
+  }
+
+  .shell-topbar-actions .topbar-action-btn:first-of-type {
+    display: none;
   }
 }
 
@@ -14988,3 +15119,729 @@ body.modal-open-report {
   }
 }
 
+/* Final device-safety rules. Keep content readable without changing the layout model. */
+@media screen {
+  img,
+  svg,
+  video,
+  canvas {
+    max-width: 100%;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    max-width: 100%;
+    font: inherit;
+  }
+
+  .analysis-page,
+  .shell-page-container,
+  .home-content,
+  .main-workspace {
+    min-width: 0;
+  }
+
+  .analysis-panel,
+  .analysis-metric-card,
+  .analysis-empty,
+  .upload-card,
+  .workflow-card,
+  .discovery-section,
+  .dashboard-card,
+  .home-stat-card {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .shell-page-container {
+    padding-bottom: max(48px, env(safe-area-inset-bottom));
+  }
+
+  .home-page,
+  .main-workspace {
+    padding-bottom: max(75px, calc(48px + env(safe-area-inset-bottom)));
+  }
+
+  @media (max-width: 560px) {
+    .home-topbar {
+      min-width: 0;
+      gap: 8px;
+    }
+
+    .home-topbar > * {
+      min-width: 0;
+    }
+
+    .home-search {
+      max-width: 100%;
+    }
+
+    .home-hero h1 {
+      font-size: clamp(38px, 13vw, 52px);
+      overflow-wrap: anywhere;
+    }
+
+    .hero-main-content {
+      padding-inline: clamp(20px, 7vw, 30px);
+    }
+
+    .hero-actions,
+    .hero-primary-button,
+    .hero-secondary-button {
+      width: 100%;
+    }
+
+    .hero-primary-button,
+    .hero-secondary-button {
+      justify-content: center;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .shell-page-container,
+    .analysis-page {
+      padding-inline: 10px !important;
+    }
+
+    .home-hero {
+      border-radius: 14px;
+    }
+
+    .upload-card,
+    .workflow-card,
+    .discovery-section,
+    .dashboard-card {
+      padding-inline: 14px;
+    }
+  }
+}
+
+/* =========================================================
+   GLOBAL RESPONSIVE COMPATIBILITY LAYER
+   Fixes "zoomed in" issues on Windows & all devices.
+   Covers every breakpoint from 1400px down to 320px.
+   ========================================================= */
+
+/* 1400px — Large tablets / small desktops */
+@media (max-width: 1400px) {
+  .dashboard-content,
+  .dashboard-summary-grid {
+    max-width: 100%;
+  }
+
+  .dashboard-summary-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .home-content {
+    max-width: 100%;
+  }
+
+  .analysis-page-header,
+  .analysis-metric-grid,
+  .analysis-panel,
+  .analysis-empty {
+    max-width: 100%;
+  }
+
+  .home-hero h1 {
+    font-size: clamp(36px, 4.5vw, 68px);
+  }
+}
+
+/* 1280px — Typical Windows laptop / 13" screens */
+@media (max-width: 1280px) {
+  /* Dashboard grid */
+  .dashboard-summary-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .dashboard-two-column {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-main {
+    padding-right: 16px;
+  }
+
+  /* Home page */
+  .home-stat-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .home-two-column {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .hero-main-content {
+    width: 65%;
+  }
+
+  .hero-visual {
+    width: 40%;
+  }
+
+  /* Analysis pages */
+  .analysis-metric-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Blast radius */
+  .blast-radius-container.blast-workspace-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Migration */
+  .migration-split {
+    grid-template-columns: 1fr;
+  }
+
+  /* Mosca */
+  .mosca-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Overview merkle */
+  .merkle-two-col {
+    grid-template-columns: 1fr;
+  }
+
+  /* Scan config */
+  .repo-overview-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* 1024px — Tablet landscape / small laptops (key Windows issue zone) */
+@media (max-width: 1024px) {
+  /* Sidebar - becomes compact icon-bar */
+  .persistent-sidebar {
+    width: 68px;
+    padding: 12px 8px;
+  }
+
+  .persistent-shell-content {
+    margin-left: 92px;
+  }
+
+  /* Dashboard rail */
+  .dashboard-rail {
+    width: 68px;
+  }
+
+  .dashboard-main {
+    width: calc(100% - 104px);
+    margin-left: 104px;
+    padding-right: 14px;
+  }
+
+  /* Home rail */
+  .side-rail {
+    width: 58px;
+    padding: 12px 8px;
+  }
+
+  .main-workspace {
+    width: calc(100% - 58px);
+    margin-left: 58px;
+    padding: 14px 16px 48px;
+  }
+
+  /* Grids collapse */
+  .dashboard-summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .home-stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .discovery-types {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .mosca-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mosca-buckets,
+  .integrity-cards {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Topbar shrink */
+  .dashboard-search,
+  .home-search {
+    width: 200px;
+  }
+
+  /* Hero */
+  .home-hero {
+    min-height: 360px;
+  }
+
+  .hero-main-content {
+    width: 75%;
+    padding: 36px 28px;
+  }
+
+  .hero-visual {
+    width: 30%;
+  }
+
+  /* Analysis header */
+  .analysis-page-header {
+    gap: 16px;
+  }
+}
+
+/* 900px — Tablet portrait */
+@media (max-width: 900px) {
+  /* Font sizing */
+  .home-hero h1 {
+    font-size: clamp(32px, 7vw, 52px);
+  }
+
+  /* Grids */
+  .dashboard-summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .home-stat-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .home-two-column {
+    grid-template-columns: 1fr;
+  }
+
+  .discovery-types {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .content-type-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Topbar */
+  .dashboard-topbar,
+  .home-topbar {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 56px;
+    gap: 8px;
+    padding: 8px 0;
+  }
+
+  .dashboard-search,
+  .home-search {
+    width: 160px;
+  }
+
+  /* Analysis pages */
+  .analysis-metric-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .analysis-page {
+    padding: 24px clamp(12px, 3vw, 36px) 48px;
+  }
+
+  /* Blast radius details panel */
+  .blast-detail-panel {
+    width: 100%;
+  }
+
+  /* Report header */
+  .report-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+}
+
+/* 768px — Tablet portrait standard */
+@media (max-width: 768px) {
+  /* Switch dashboard rail to bottom bar */
+  .dashboard-rail {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    width: 100%;
+    height: 58px;
+    border-radius: 16px 16px 0 0;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 6px 12px;
+    z-index: 100;
+  }
+
+  .dashboard-logo-container,
+  .dashboard-rail-bottom {
+    display: none;
+  }
+
+  .dashboard-rail-nav {
+    flex-direction: row;
+    gap: 6px;
+  }
+
+  .dashboard-main {
+    width: 100%;
+    margin-left: 0;
+    padding: 0 14px 80px;
+  }
+
+  /* Home: side rail to bottom */
+  .side-rail {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    width: 100%;
+    height: 58px;
+    border-radius: 16px 16px 0 0;
+    flex-direction: row;
+    justify-content: center;
+    padding: 6px 12px;
+  }
+
+  .rail-logo-container,
+  .rail-bottom {
+    display: none;
+  }
+
+  .rail-nav {
+    flex-direction: row;
+    gap: 7px;
+  }
+
+  .main-workspace {
+    width: 100%;
+    margin-left: 0;
+    padding: 14px 14px 80px;
+  }
+
+  /* Grids go single column */
+  .dashboard-summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .home-stat-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .analysis-metric-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  /* Discovery grid */
+  .discovery-types {
+    grid-template-columns: 1fr;
+  }
+
+  /* Hero: visual off */
+  .hero-main-content {
+    width: 100%;
+    padding: 28px 20px;
+  }
+
+  .hero-visual {
+    display: none;
+  }
+
+  /* Topbar */
+  .dashboard-topbar,
+  .home-topbar {
+    padding: 6px 4px;
+    gap: 8px;
+  }
+
+  .workspace-label,
+  .dashboard-title-mini {
+    display: none;
+  }
+
+  .dashboard-search,
+  .home-search {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+  }
+
+  /* Analysis page header */
+  .analysis-page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .analysis-page-nav {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  /* Mosca */
+  .mosca-heatmap,
+  .mosca-buckets,
+  .integrity-cards {
+    grid-template-columns: 1fr;
+  }
+
+  /* Migration */
+  .migration-split {
+    grid-template-columns: 1fr;
+  }
+
+  /* Scan config */
+  .repo-overview-strip {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .scan-config-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Dashboard status footer */
+  .dashboard-status-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+}
+
+/* 640px — Large phones landscape */
+@media (max-width: 640px) {
+  .home-hero {
+    min-height: auto;
+    border-radius: 16px;
+  }
+
+  .home-hero h1 {
+    font-size: clamp(28px, 9vw, 44px);
+    line-height: 1.05;
+  }
+
+  .hero-main-content {
+    padding: 24px 18px 20px;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hero-primary-button,
+  .hero-secondary-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .dashboard-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .analysis-metric-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .upload-card,
+  .workflow-card,
+  .discovery-section,
+  .dashboard-card {
+    padding: 16px;
+  }
+
+  .analysis-page {
+    padding: 20px 12px 48px;
+  }
+
+  /* Repo strip */
+  .repo-overview-strip {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Inventory table — allow scroll */
+  .inventory-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Blast radius */
+  .blast-metrics {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  /* History grid */
+  .history-grid,
+  .history-page-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 480px — Standard phones */
+@media (max-width: 480px) {
+  body {
+    font-size: 14px;
+  }
+
+  .home-hero h1 {
+    font-size: clamp(26px, 10vw, 38px);
+  }
+
+  .section-heading-row h2,
+  .discovery-heading h2 {
+    font-size: 18px;
+  }
+
+  .dashboard-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .repo-overview-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .blast-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .analysis-page-header h1 {
+    font-size: clamp(22px, 8vw, 32px);
+  }
+
+  .analysis-panel,
+  .analysis-empty {
+    padding: 14px;
+  }
+
+  /* Tables get card style on mobile */
+  .inventory-table {
+    min-width: 680px;
+  }
+
+  .dashboard-rail-item,
+  .rail-nav-item {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+  }
+
+  .history-page-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Report actions stack */
+  .report-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+}
+
+/* 360px — Small phones */
+@media (max-width: 360px) {
+  .home-hero h1 {
+    font-size: clamp(22px, 11vw, 30px);
+  }
+
+  .hero-kicker {
+    font-size: 10px;
+  }
+
+  .hero-primary-button,
+  .hero-secondary-button {
+    height: 38px;
+    font-size: 13px;
+    padding: 0 14px;
+  }
+
+  .upload-drop-area {
+    min-height: 220px;
+    padding: 20px 14px;
+  }
+
+  .analysis-page {
+    padding: 14px 10px 48px;
+  }
+
+  .persistent-sidebar {
+    height: 54px;
+  }
+
+  .dashboard-rail,
+  .side-rail {
+    height: 54px;
+  }
+
+  .dashboard-main,
+  .main-workspace {
+    padding-bottom: 62px;
+  }
+}
+
+/* Touch device improvements */
+@media (hover: none) and (pointer: coarse) {
+  /* Increase tap targets */
+  .persistent-nav-item,
+  .rail-nav-item,
+  .dashboard-rail-item {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .analysis-page-nav a {
+    padding: 10px 14px;
+  }
+
+  /* Remove hover transforms that look bad on touch */
+  .home-stat-card:hover,
+  .discovery-type-card:hover,
+  .mosca-risk-card:hover {
+    transform: none;
+  }
+}
+
+/* High-DPI Windows displays fix (125%, 150% scaling) */
+@media screen and (-webkit-min-device-pixel-ratio: 1.25),
+       screen and (min-resolution: 120dpi) {
+  html {
+    /* Scale down slightly to compensate for Windows DPI scaling */
+    font-size: clamp(12px, 0.9vw, 15px);
+  }
+}
+
+/* Very wide screens — prevent content from stretching */
+@media (min-width: 1600px) {
+  html {
+    font-size: 16px; /* Lock at 16px for large monitors */
+  }
+
+  .dashboard-content,
+  .home-content,
+  .analysis-page-header,
+  .analysis-metric-grid,
+  .analysis-panel,
+  .analysis-empty {
+    max-width: 1460px;
+  }
+}

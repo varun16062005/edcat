@@ -9,7 +9,7 @@ from .dependencies import build_dependency_graph
 from .file_detector import detect_file_type
 
 
-MAX_TEXT_FILE_SIZE = 10 * 1024 * 1024
+MAX_TEXT_FILE_SIZE = 50 * 1024 * 1024  # 50 MB per individual text file
 
 IGNORED_DIRECTORIES = {
     "node_modules",

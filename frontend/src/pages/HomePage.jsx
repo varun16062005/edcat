@@ -18,6 +18,7 @@ import {
   ShieldAlert,
   ShieldCheck,
   Upload,
+  Wifi,
   X,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -25,7 +26,7 @@ import { useNavigate } from "react-router-dom";
 import GlobalSearch from "../components/GlobalSearch";
 import { makeEntityId } from "../context/entityIds";
 import { useEcdatContext } from "../context/useEcdatContext";
-import { scanFile } from "../services/api";
+import { scanFile, warmupBackend } from "../services/api";
 import { snapshotCurrentScan } from "../lib/artifactIntegrity";
 
 import "../App.css";
@@ -85,7 +86,7 @@ const SUPPORTED_EXTENSIONS = new Set([
 ]);
 
 const MAX_TOTAL_UPLOAD_SIZE = 500 * 1024 * 1024;
-const MAX_TEXT_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_TEXT_FILE_SIZE = 50 * 1024 * 1024; // 50 MB — matches backend scanner limit
 const ARCHIVE_EXTENSIONS = new Set([".zip", ".tar", ".gz", ".tgz", ".tar.gz"]);
 
 function getExtension(path) {
@@ -313,6 +314,9 @@ export default function Home() {
   const [errorMessage, setErrorMessage] =
     useState("");
 
+  const [warmupStatus, setWarmupStatus] =
+    useState("");
+
   // Live Time Loading timer
   useEffect(() => {
     if (!isScanning) return;
@@ -460,7 +464,18 @@ export default function Home() {
 
     setIsScanning(true);
     setErrorMessage("");
+    setWarmupStatus("");
 
+    // ── Step 1: Warm up the backend (handles Render cold-start) ──
+    // For large files (> 5 MB) we always ping first to wake the server.
+    // This prevents the upload from timing out mid-way on a sleeping instance.
+    const isLargeUpload = (scanInput.totalBytes || 0) > 5 * 1024 * 1024;
+    if (isLargeUpload) {
+      await warmupBackend((msg) => setWarmupStatus(msg));
+    }
+    setWarmupStatus("");
+
+    // ── Step 2: Start scan animation and run the actual scan ──
     startStageAnimation();
 
     const minimumDisplayTime = 7600;
@@ -528,6 +543,7 @@ export default function Home() {
       );
     } finally {
       setIsScanning(false);
+      setWarmupStatus("");
     }
   };
 
@@ -899,7 +915,7 @@ export default function Home() {
                         {isScanning ? (
                           <>
                             <span className="mini-spinner"></span>
-                            <span>Scanning...</span>
+                            <span>{warmupStatus ? "Connecting…" : "Scanning…"}</span>
                           </>
                         ) : (
                           <>
@@ -918,13 +934,18 @@ export default function Home() {
                 )}
               </div>
 
+              {/* Warmup status banner */}
+              {warmupStatus && !errorMessage && (
+                <div className="upload-warmup-status">
+                  <Wifi size={14} className="warmup-icon" />
+                  <span>{warmupStatus}</span>
+                </div>
+              )}
+
               {errorMessage && (
                 <div className="upload-error">
                   <ShieldAlert size={15} />
-
-                  <span>
-                    {errorMessage}
-                  </span>
+                  <span>{errorMessage}</span>
                 </div>
               )}
             </div>

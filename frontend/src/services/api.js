@@ -6,6 +6,41 @@ const API_BASE_URL = (
 let lastScanInput = null;
 
 
+/* ============================================================
+   BACKEND WARMUP — Pings /health until server is awake.
+   Render free tier sleeps after inactivity; this avoids
+   cold-start timeouts before the heavy /scan request.
+   ============================================================ */
+
+export async function warmupBackend(onStatus) {
+  const MAX_ATTEMPTS = 8;
+  const BASE_DELAY_MS = 2000;
+
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      onStatus?.(`Waking up server… (attempt ${attempt}/${MAX_ATTEMPTS})`);
+      const res = await fetch(`${API_BASE_URL}/health`, {
+        method: "GET",
+        signal: AbortSignal.timeout(10000), // 10s per ping
+      });
+      if (res.ok) {
+        onStatus?.("Server ready. Starting scan…");
+        return true;
+      }
+    } catch {
+      // Server not yet awake — wait and retry
+    }
+
+    if (attempt < MAX_ATTEMPTS) {
+      await new Promise((r) => setTimeout(r, BASE_DELAY_MS * attempt));
+    }
+  }
+
+  // If we couldn't warm up, try the scan anyway (may still succeed)
+  onStatus?.("Proceeding with scan…");
+  return false;
+}
+
 
 /* ============================================================
    SCAN FILE
