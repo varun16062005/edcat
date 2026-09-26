@@ -255,9 +255,12 @@ export default function DependencyExplorer({
   artifacts,
   files,
   view = "graph",
+  highlightIds = [],
+  selectedId = "",
 }) {
   const { selectContext } = useEcdatContext();
-  const [selectedNodeId, setSelectedNodeId] = useState("");
+  const [internalSelectedId, setInternalSelectedId] = useState("");
+  const selectedNodeId = selectedId || internalSelectedId;
   const [scale, setScale] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
@@ -327,7 +330,7 @@ export default function DependencyExplorer({
   }, [nodes]);
 
   const selectNode = (node) => {
-    setSelectedNodeId(node.id);
+    setInternalSelectedId(node.id);
     if (node.type === "artifact") {
       const artifact = artifacts[node.artifactIndex];
       if (!artifact) return;
@@ -404,6 +407,7 @@ export default function DependencyExplorer({
 
   const selectedNode = nodeMap.get(selectedNodeId);
   const connectedIds = useMemo(() => {
+    if (highlightIds.length) return new Set(highlightIds);
     if (!selectedNodeId) return new Set();
     const connected = new Set([selectedNodeId]);
     edges.forEach((edge) => {
@@ -411,7 +415,7 @@ export default function DependencyExplorer({
       if (edge.target === selectedNodeId) connected.add(edge.source);
     });
     return connected;
-  }, [edges, selectedNodeId]);
+  }, [edges, highlightIds, selectedNodeId]);
 
   const edgeTypes = [...new Set(edges.map((edge) => edge.label || edge.type))];
   const nodeTypes = [...new Set(nodes.map((node) => node.type))];
@@ -471,7 +475,8 @@ export default function DependencyExplorer({
               const source = layout.positions.get(edge.source);
               const target = layout.positions.get(edge.target);
               if (!source || !target) return null;
-              const isConnected = !selectedNodeId || edge.source === selectedNodeId || edge.target === selectedNodeId;
+              const focusing = Boolean(selectedNodeId || highlightIds.length);
+              const isConnected = !focusing || (connectedIds.has(edge.source) && connectedIds.has(edge.target));
               const midpointX = (source.x + target.x) / 2;
               const midpointY = (source.y + target.y) / 2;
               return (
@@ -484,7 +489,8 @@ export default function DependencyExplorer({
             {nodes.map((node) => {
               const point = layout.positions.get(node.id);
               if (!point) return null;
-              const isConnected = !selectedNodeId || connectedIds.has(node.id);
+              const focusing = Boolean(selectedNodeId || highlightIds.length);
+              const isConnected = !focusing || connectedIds.has(node.id);
               return (
                 <foreignObject key={node.id} x={point.x - 78} y={point.y} width="156" height="66" className={isConnected ? "" : "dimmed"}>
                   <DependencyNode

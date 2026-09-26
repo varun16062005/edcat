@@ -6,11 +6,14 @@ import {
   CheckCircle2,
   ChevronDown,
   Code2,
+  Copy,
   Download,
   FileArchive,
   FileCode2,
+  FileText,
   Filter,
   HardDrive,
+  Hash,
   History,
   KeyRound,
   Lightbulb,
@@ -33,14 +36,15 @@ import {
   useNavigate,
 } from "react-router-dom";
 
-import {
-  generatePdfReport,
-} from "../services/api";
 import GlobalSearch from "../components/GlobalSearch";
 import DependencyExplorer from "../components/DependencyExplorer";
-import QuantumEraScenario from "../components/QuantumEraScenario";
 import { useEcdatContext } from "../context/useEcdatContext";
 import { artifactEntityId, makeEntityId } from "../context/entityIds";
+import {
+  getArtifactHash,
+  formatShortHashNumber,
+  formatDisplayHash,
+} from "../utils/cryptoHash";
 
 
 const CURRENT_SCAN_KEY =
@@ -695,7 +699,7 @@ function DashboardSummary({
    MAIN DASHBOARD
    ============================================================ */
 
-function Dashboard() {
+function Dashboard({ discoveryOnly = false }) {
   const navigate =
     useNavigate();
 
@@ -781,9 +785,9 @@ function Dashboard() {
   ] = useState(false);
 
   const [
-    pdfLoading,
-    setPdfLoading,
-  ] = useState(false);
+    copiedHash,
+    setCopiedHash,
+  ] = useState(null);
 
 
   const [
@@ -1437,62 +1441,23 @@ function Dashboard() {
      EXPORT PDF
      ========================================================== */
 
-  const exportPDF =
-    async () => {
-      setPdfLoading(true);
-
-      try {
-        await generatePdfReport(
-          scanResult
-        );
-      } catch (error) {
-        window.alert(
-          error?.message ||
-            "Unable to generate PDF report."
-        );
-      } finally {
-        setPdfLoading(
-          false
-        );
-      }
-    };
+  const exportPDF = () => {
+    navigate("/report");
+  };
 
 
   /* ==========================================================
      EMPTY STATE
      ========================================================== */
 
+  useEffect(() => {
+    if (!scanResult) {
+      navigate("/", { replace: true });
+    }
+  }, [scanResult, navigate]);
+
   if (!scanResult) {
-    return (
-      <div className="dashboard-empty">
-        <div className="dashboard-empty-logo">
-          <img
-            src="/ecdat-logo.png"
-            alt="ECDAT"
-          />
-        </div>
-
-        <h2>
-          No scan available
-        </h2>
-
-        <p>
-          Upload a project or
-          cryptographic artifact
-          from the ECDAT homepage.
-        </p>
-
-        <button
-          className="dashboard-primary-button"
-          onClick={() =>
-            navigate("/")
-          }
-        >
-          <ArrowLeft size={15} />
-          Back to upload
-        </button>
-      </div>
-    );
+    return null;
   }
 
 
@@ -1624,7 +1589,7 @@ function Dashboard() {
             className="dashboard-rail-item"
             title="Back to upload"
             onClick={() =>
-              navigate("/")
+              navigate("/scan-config")
             }
           >
             <ArrowLeft size={19} />
@@ -1710,18 +1675,11 @@ function Dashboard() {
 
               <button
                 className="dashboard-secondary-button"
-                onClick={
-                  exportPDF
-                }
-                disabled={
-                  pdfLoading
-                }
+                onClick={exportPDF}
+                title="View & export complete 4-part PDF report (Dashboard, Risk Analysis, Migration, Overview CBOM)"
               >
-                <Download size={14} />
-
-                {pdfLoading
-                  ? "Generating..."
-                  : "PDF"}
+                <FileText size={14} />
+                Full Report (PDF)
               </button>
 
 
@@ -1766,7 +1724,7 @@ function Dashboard() {
               <button
                 className="dashboard-primary-button"
                 onClick={() =>
-                  navigate("/")
+                  navigate("/scan-config")
                 }
               >
                 New Scan
@@ -1832,6 +1790,7 @@ function Dashboard() {
               FLOW
           ================================================== */}
 
+          {!discoveryOnly && (
           <section className="analysis-flow">
 
             <FlowStep
@@ -1881,6 +1840,7 @@ function Dashboard() {
             />
 
           </section>
+          )}
 
 
           {/* ==================================================
@@ -1963,13 +1923,13 @@ function Dashboard() {
 
 
             <DashboardSummary
-              label="Recommendations"
+              label="CBOM components"
               value={
-                recommendationCount
+                cbomComponents.length
               }
-              description="Findings with guidance"
+              description="Inventory components"
               icon={
-                <Lightbulb
+                <FileCode2
                   size={16}
                 />
               }
@@ -1982,6 +1942,7 @@ function Dashboard() {
               SECURITY POSTURE
           ================================================== */}
 
+          {!discoveryOnly && (
           <section
             className={`security-posture-card ${posture.className}`}
           >
@@ -2075,9 +2036,7 @@ function Dashboard() {
             </div>
 
           </section>
-
-
-          <QuantumEraScenario artifacts={artifacts} />
+          )}
 
 
           {/* ==================================================
@@ -2362,7 +2321,7 @@ function Dashboard() {
 
           <section
             className="dashboard-card algorithm-footprint-card"
-            id="risk-analysis"
+            id="algorithm-footprint"
           >
 
             <div className="dashboard-card-header">
@@ -2394,6 +2353,7 @@ function Dashboard() {
             </div>
 
 
+            {!discoveryOnly && (
             <div className="analysis-view-tabs" role="tablist" aria-label="Cryptographic analysis views">
               <button
                 type="button"
@@ -2423,9 +2383,10 @@ function Dashboard() {
                 Dependency Tree
               </button>
             </div>
+            )}
 
 
-            {analysisView === "footprint" ? (
+            {(discoveryOnly || analysisView === "footprint") ? (
               <>
 
             <div className="algorithm-footprint-chart">
@@ -2824,6 +2785,9 @@ function Dashboard() {
                           artifacts.indexOf(
                             artifact
                           );
+                        const artHash = getArtifactHash(artifact, originalIndex);
+                        const shortHash = formatShortHashNumber(artHash, 8);
+                        const displayHash = formatDisplayHash(artHash, 8, 6);
 
                         return (
                           <Fragment
@@ -2877,12 +2841,18 @@ function Dashboard() {
 
                                 <div>
 
-                                  <strong>
-                                    {
-                                      artifact.algorithm ||
-                                      "Unknown"
-                                    }
-                                  </strong>
+                                  <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                                    <strong>
+                                      {
+                                        artifact.algorithm ||
+                                        "Unknown"
+                                      }
+                                    </strong>
+                                    <span className="hash-tag-pill" title={`SHA-256: ${artHash}`}>
+                                      <Hash size={10} />
+                                      <span>{shortHash}</span>
+                                    </span>
+                                  </div>
 
                                   <span>
                                     {
@@ -3050,6 +3020,31 @@ function Dashboard() {
                                         }
                                       </p>
 
+                                      <div className="asset-hash-row" style={{ marginTop: "10px", maxWidth: "480px" }}>
+                                        <span className="hash-tag-pill" title={`Full SHA-256: ${artHash}`}>
+                                          <Hash size={11} />
+                                          <span>#{shortHash}</span>
+                                        </span>
+                                        <span className="hash-full-preview">{displayHash}</span>
+                                        <button
+                                          type="button"
+                                          className="btn-copy-hash"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigator.clipboard?.writeText(artHash);
+                                            setCopiedHash(artHash);
+                                            setTimeout(() => setCopiedHash(null), 2000);
+                                          }}
+                                          title="Copy Full SHA-256 Hash"
+                                        >
+                                          {copiedHash === artHash ? (
+                                            <CheckCircle2 size={12} className="copied" />
+                                          ) : (
+                                            <Copy size={12} />
+                                          )}
+                                        </button>
+                                      </div>
+
                                     </div>
 
 
@@ -3104,6 +3099,13 @@ function Dashboard() {
                                           artifact.algorithm ||
                                           "Unknown"
                                         }
+                                      </strong>
+                                    </div>
+
+                                    <div className="asset-dropdown-info">
+                                      <span>ARTIFACT HASH</span>
+                                      <strong title={artHash} style={{ fontFamily: "monospace", fontSize: "11px" }}>
+                                        {displayHash}
                                       </strong>
                                     </div>
 
@@ -3507,6 +3509,7 @@ function Dashboard() {
               RECOMMENDATIONS
           ================================================== */}
 
+          {!discoveryOnly && (
           <section
             className="dashboard-card recommendation-dashboard-card"
             id="recommendations"
@@ -3643,12 +3646,13 @@ function Dashboard() {
             />
 
           </section>
-
+          )}
 
           {/* ==================================================
               HISTORY
           ================================================== */}
 
+          {!discoveryOnly && (
           <section
             className="dashboard-card history-card"
             id="history"
@@ -3829,7 +3833,7 @@ function Dashboard() {
             )}
 
           </section>
-
+          )}
 
           {/* ==================================================
               FOOTER

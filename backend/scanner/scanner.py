@@ -1,3 +1,5 @@
+import json
+import hashlib
 import ssl
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -371,6 +373,9 @@ def find_crypto_artifacts(
                 "recommendation": rule[
                     "recommendation"
                 ],
+                "content_hash": hashlib.sha256(
+                    source_line.encode("utf-8")
+                ).hexdigest(),
             }
 
             duplicate = any(
@@ -390,6 +395,26 @@ def find_crypto_artifacts(
                     artifact
                 )
 
+    return artifacts
+
+
+def attach_content_hashes(artifacts: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    for artifact in artifacts:
+        payload = {
+            "file": artifact.get("file"),
+            "line": artifact.get("line"),
+            "algorithm": artifact.get("algorithm"),
+            "category": artifact.get("category"),
+            "usage": artifact.get("usage"),
+            "risk": artifact.get("risk"),
+            "quantum_status": artifact.get("quantum_status"),
+            "key_size": artifact.get("key_size"),
+            "mode": artifact.get("mode"),
+            "code": artifact.get("code"),
+        }
+        artifact["content_hash"] = hashlib.sha256(
+            json.dumps(payload, sort_keys=True, default=str).encode("utf-8")
+        ).hexdigest()
     return artifacts
 
 
@@ -590,6 +615,8 @@ def scan_directory(
         artifacts.extend(
             detected
         )
+
+    attach_content_hashes(artifacts)
 
     return {
         "summary": create_summary(

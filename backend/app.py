@@ -6,6 +6,8 @@ from typing import Any, Dict, List, Optional
 from zipfile import BadZipFile, ZipFile, is_zipfile
 import tarfile
 
+from pydantic import BaseModel, Field
+
 from fastapi import (
     FastAPI,
     File,
@@ -31,6 +33,8 @@ ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
     "http://localhost:5174",
     "http://127.0.0.1:5174",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
     *[
         origin.strip().rstrip("/")
         for origin in os.getenv("FRONTEND_ORIGINS", "").split(",")
@@ -70,12 +74,31 @@ app.add_middleware(
 
 @app.middleware("http")
 async def ensure_api_cors_headers(request: Request, call_next):
-    response = await call_next(request)
     origin = request.headers.get("origin", "").rstrip("/")
+    is_allowed = (
+        origin in ALLOWED_ORIGINS
+        or origin.startswith("http://localhost")
+        or origin.startswith("http://127.0.0.1")
+        or origin.endswith(".netlify.app")
+    )
 
-    if origin in ALLOWED_ORIGINS:
+    if request.method == "OPTIONS":
+        from fastapi.responses import Response
+        resp = Response(status_code=204)
+        if is_allowed and origin:
+            resp.headers["Access-Control-Allow-Origin"] = origin
+            resp.headers["Access-Control-Allow-Credentials"] = "true"
+            resp.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, HEAD"
+            resp.headers["Access-Control-Allow-Headers"] = "*"
+        return resp
+
+    response = await call_next(request)
+
+    if is_allowed and origin:
         response.headers["Access-Control-Allow-Origin"] = origin
         response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, HEAD"
+        response.headers["Access-Control-Allow-Headers"] = "*"
 
     if request.url.path == "/scan":
         response.headers["Cache-Control"] = "no-store"
@@ -377,3 +400,213 @@ async def scan_file(
             result["input"]["scan_status"] = "scanned_archive"
 
         return result
+
+
+@app.post("/scan/artifact")
+async def scan_artifact(
+    file: UploadFile = File(...),
+    relative_path: str = Form(default=""),
+    project_name: str = Form(default="artifact"),
+) -> Dict[str, Any]:
+    """Run the normal scanner against one uploaded artifact file."""
+    with TemporaryDirectory(prefix="ecdat_artifact_scan_") as temporary_directory:
+        scan_root = Path(temporary_directory) / "scan"
+        scan_root.mkdir(parents=True, exist_ok=True)
+        safe_path = safe_relative_path(
+            scan_root,
+            relative_path or Path(file.filename or "artifact").name,
+        )
+        safe_path.parent.mkdir(parents=True, exist_ok=True)
+        await save_upload_file(file, safe_path)
+        result = scan_directory(scan_root, project_name=project_name)
+        return {
+            "artifacts": result.get("artifacts", []),
+            "files": result.get("files", []),
+            "summary": result.get("summary", {}),
+            "input": result.get("input", {}),
+        }
+
+
+class AssistantQuery(BaseModel):
+    question: str = ""
+    context: Dict[str, Any] = Field(default_factory=dict)
+
+
+def _sanitize_advisor_context(context: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    source = context if isinstance(context, dict) else {}
+    artifacts = []
+    for artifact in source.get("artifacts") or []:
+        if not isinstance(artifact, dict):
+            continue
+        artifacts.append({
+            "file": artifact.get("file"),
+            "line": artifact.get("line"),
+            "algorithm": artifact.get("algorithm"),
+            "category": artifact.get("category"),
+            "risk": artifact.get("risk"),
+            "quantum_status": artifact.get("quantum_status"),
+            "recommendation": artifact.get("recommendation"),
+            "content_hash": artifact.get("content_hash"),
+        })
+    return {
+        "project": source.get("project") or {},
+        "summary": source.get("summary") or {},
+        "files": source.get("files") or [],
+        "artifacts": artifacts[:120],
+        "cbom": source.get("cbom") or {},
+        "dependencies": source.get("dependencies") or {},
+        "scenarioRisk": source.get("scenarioRisk") or {},
+        "migration": source.get("migration") or [],
+        "changes": source.get("changes") or {},
+    }
+
+
+def answer_advisor_question(question: str, context: Dict[str, Any]) -> Dict[str, Any]:
+    topic = (question or "").lower()
+    artifacts = context.get("artifacts") or []
+    summary = context.get("summary") or {}
+    files = context.get("files") or []
+    changes = context.get("changes") or {}
+    migration = context.get("migration") or []
+    dependencies = context.get("dependencies") or {}
+    cbom = context.get("cbom") or {}
+
+    if "how many" in topic and ("asset" in topic or "discover" in topic):
+        count = summary.get("crypto_assets") or len(artifacts)
+        return {
+            "answer": f"The current scan contains {count} cryptographic assets.",
+            "sources": ["summary.crypto_assets"],
+        }
+
+    if "quantum" in topic and "vulnerable" in topic:
+        vulnerable = [
+            item for item in artifacts
+            if str(item.get("quantum_status") or "").upper() == "VULNERABLE"
+        ]
+        algorithms = sorted({item.get("algorithm") or "Unknown" for item in vulnerable})
+        if not vulnerable:
+            return {
+                "answer": "No artifacts in this scan are marked quantum_status=VULNERABLE.",
+                "sources": ["artifacts.quantum_status"],
+            }
+        return {
+            "answer": (
+                f"{len(vulnerable)} artifacts are quantum vulnerable. "
+                f"Algorithms: {', '.join(algorithms)}."
+            ),
+            "sources": ["artifacts.quantum_status"],
+        }
+
+    if "rsa" in topic:
+        rsa = [
+            item for item in artifacts
+            if "RSA" in str(item.get("algorithm") or "").upper()
+        ]
+        files_with_rsa = sorted({item.get("file") or "Unknown file" for item in rsa})
+        if not rsa:
+            return {
+                "answer": "This scan does not contain RSA findings.",
+                "sources": ["artifacts.algorithm"],
+            }
+        return {
+            "answer": f"{len(rsa)} RSA findings appear in: {', '.join(files_with_rsa[:12])}.",
+            "sources": ["artifacts.algorithm"],
+        }
+
+    if "highest" in topic or "priority" in topic or "migrate first" in topic:
+        ranked = sorted(
+            artifacts,
+            key=lambda item: (
+                0 if item.get("risk") == "CRITICAL" else
+                1 if item.get("risk") == "HIGH" else 2
+            ),
+        )
+        if not ranked:
+            return {
+                "answer": "No artifacts are available to prioritize.",
+                "sources": ["artifacts.risk"],
+            }
+        first = ranked[0]
+        line = f":{first['line']}" if first.get("line") else ""
+        return {
+            "answer": (
+                f"Highest-priority finding: {first.get('algorithm') or 'artifact'} in "
+                f"{first.get('file') or 'unknown file'}{line} "
+                f"with risk {first.get('risk') or 'unspecified'}."
+            ),
+            "sources": ["artifacts.risk"],
+        }
+
+    if "pqc" in topic or "alternative" in topic:
+        if not migration:
+            return {
+                "answer": "PQC alternatives are unavailable in the current scan context.",
+                "sources": ["migration"],
+            }
+        preview = "; ".join(
+            f"{item.get('algorithm') or 'artifact'} → {item.get('alternative') or 'not specified'}"
+            for item in migration[:8]
+            if isinstance(item, dict)
+        )
+        return {
+            "answer": f"Recommended replacements from scan evidence: {preview}.",
+            "sources": ["migration"],
+        }
+
+    if "cbom" in topic:
+        return {
+            "answer": (
+                f"CBOM summary: {cbom.get('components') or 0} components"
+                f"{' using ' + str(cbom.get('spec')) if cbom.get('spec') else ''}."
+            ),
+            "sources": ["cbom"],
+        }
+
+    if "changed" in topic or "previous scan" in topic:
+        if not changes:
+            return {
+                "answer": "Change detection data is unavailable for this scan.",
+                "sources": ["changes"],
+            }
+        return {
+            "answer": (
+                "Since the previous local scan: "
+                f"{changes.get('unchanged', 0)} unchanged, "
+                f"{changes.get('changed', 0)} changed, "
+                f"{changes.get('new', 0)} new, "
+                f"{changes.get('removed', 0)} removed."
+            ),
+            "sources": ["changes"],
+        }
+
+    if "reach" in topic or "blast" in topic or "dependenc" in topic:
+        return {
+            "answer": (
+                "Dependency evidence contains "
+                f"{dependencies.get('nodes') or 0} nodes and "
+                f"{dependencies.get('edges') or 0} edges. "
+                "Open Blast Radius to compute reach for a selected artifact. "
+                "Largest individual reach is not precomputed in this context."
+            ),
+            "sources": ["dependencies"],
+        }
+
+    count = summary.get("crypto_assets") or len(artifacts)
+    file_count = summary.get("files_scanned") or len(files)
+    return {
+        "answer": (
+            f"The current scan covers {file_count} files and {count} cryptographic assets. "
+            "That fact is available. Ask about RSA files, quantum-vulnerable algorithms, "
+            "CBOM, migration, or change detection for a more specific grounded answer."
+        ),
+        "sources": ["summary"],
+    }
+
+
+@app.post("/assistant/query")
+async def assistant_query(payload: AssistantQuery) -> Dict[str, Any]:
+    question = payload.question.strip()
+    if not question:
+        raise HTTPException(status_code=400, detail="A question is required.")
+    context = _sanitize_advisor_context(payload.context)
+    return answer_advisor_question(question, context)
