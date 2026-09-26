@@ -15963,34 +15963,122 @@ body.modal-open-report {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 12px;
+  margin-bottom: 8px;
 }
 
-.report-cat-card {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  padding: 12px 14px;
+/* Base card — each card gets its own color via nth-child */
+.report-category-card {
+  border-radius: 8px;
+  padding: 14px 12px 12px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 5px;
+  position: relative;
+  overflow: hidden;
+  border-left: 4px solid transparent;
 }
 
-.report-cat-count {
-  font-size: 20px;
+/* Card 1: Asymmetric — critical red */
+.report-category-card:nth-child(1) {
+  background: linear-gradient(160deg, #fff5f5 0%, #ffe4e6 100%);
+  border-color: #dc2626;
+  border: 1px solid #fca5a5;
+  border-left: 4px solid #dc2626;
+}
+
+/* Card 2: Symmetric — orange */
+.report-category-card:nth-child(2) {
+  background: linear-gradient(160deg, #fff8f1 0%, #ffedd5 100%);
+  border-color: #ea580c;
+  border: 1px solid #fed7aa;
+  border-left: 4px solid #ea580c;
+}
+
+/* Card 3: Hash — amber */
+.report-category-card:nth-child(3) {
+  background: linear-gradient(160deg, #fffdf0 0%, #fef9c3 100%);
+  border-color: #ca8a04;
+  border: 1px solid #fde68a;
+  border-left: 4px solid #ca8a04;
+}
+
+/* Card 4: Key Material — slate */
+.report-category-card:nth-child(4) {
+  background: linear-gradient(160deg, #f8fafc 0%, #f1f5f9 100%);
+  border-color: #475569;
+  border: 1px solid #cbd5e1;
+  border-left: 4px solid #475569;
+}
+
+/* Card header row (icon + title) */
+.cat-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 3px;
+}
+
+.cat-icon {
+  flex-shrink: 0;
+  opacity: 0.75;
+}
+
+.report-category-title {
+  font-size: 12px;
   font-weight: 800;
-  color: #0f172a;
+  color: #1e293b;
+  line-height: 1.2;
 }
 
-.report-cat-label {
-  font-size: 11px;
+/* Component count */
+.report-category-count {
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1;
+  margin: 2px 0;
+}
+
+.report-category-card:nth-child(1) .report-category-count { color: #dc2626; }
+.report-category-card:nth-child(2) .report-category-count { color: #ea580c; }
+.report-category-card:nth-child(3) .report-category-count { color: #ca8a04; }
+.report-category-card:nth-child(4) .report-category-count { color: #475569; }
+
+/* Algo list descriptor */
+.report-category-desc {
+  font-size: 10.5px;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+/* Status badge pill */
+.report-cat-status {
+  display: inline-block;
+  font-size: 10px;
   font-weight: 700;
-  color: #334155;
+  letter-spacing: 0.03em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  width: fit-content;
+  margin-top: 2px;
   text-transform: uppercase;
 }
 
-.report-cat-sub {
-  font-size: 10px;
-  color: #64748b;
+.report-cat-status.status-danger {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+}
+
+.report-cat-status.status-warn {
+  background: #fef9c3;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+}
+
+.report-cat-status.status-info {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
 }
 
 /* Compliance 4-Col Grid */
