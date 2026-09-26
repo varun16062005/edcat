@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 
 import { scanFile } from "../services/api";
 import { snapshotCurrentScan } from "../lib/artifactIntegrity";
+import ScanExecutionModal from "../components/ScanExecutionModal";
 
 const HISTORY_KEY = "ecdatScanHistory";
 const CURRENT_SCAN_KEY = "ecdatScanResult";
@@ -74,7 +75,7 @@ const SUPPORTED_EXTENSIONS = new Set([
   ".der", ".key", ".csr", ".p12", ".pfx", ".jks", ".p7b", ".p7c", ".zip", ".tar", ".gz", ".tgz",
 ]);
 
-const MAX_TOTAL_UPLOAD_SIZE = 500 * 1024 * 1024;
+const MAX_TOTAL_UPLOAD_SIZE = 100 * 1024 * 1024; // 100 MB hard limit
 const MAX_TEXT_FILE_SIZE = 10 * 1024 * 1024;
 const ARCHIVE_EXTENSIONS = new Set([".zip", ".tar", ".gz", ".tgz", ".tar.gz"]);
 
@@ -324,6 +325,16 @@ export default function ScanConfigPage() {
     const list = Array.from(files || []);
     if (!list.length) return;
     setErrorMessage("");
+
+    // Hard 100MB upload limit
+    const totalSize = list.reduce((sum, f) => sum + Number(f?.size || 0), 0);
+    if (totalSize > MAX_TOTAL_UPLOAD_SIZE) {
+      setErrorMessage(
+        `⚠️ Upload too large (${formatBytes(totalSize)}). Maximum allowed size is 100 MB. Please select fewer or smaller files.`
+      );
+      return;
+    }
+
     const normalized = list.map((file) =>
       normalizeFileEntry(file, file.webkitRelativePath || file.name)
     );
@@ -361,6 +372,16 @@ export default function ScanConfigPage() {
     try {
       const entries = await collectDroppedEntries(e.dataTransfer);
       if (!entries.length) return;
+
+      // Hard 100MB upload limit
+      const totalSize = entries.reduce((sum, en) => sum + Number(en.file?.size || 0), 0);
+      if (totalSize > MAX_TOTAL_UPLOAD_SIZE) {
+        setErrorMessage(
+          `⚠️ Upload too large (${formatBytes(totalSize)}). Maximum allowed size is 100 MB. Please drop a smaller folder or specific source files only.`
+        );
+        return;
+      }
+
       setSelectedEntries(entries);
       const isSingleArchive =
         entries.length === 1 && isArchivePath(entries[0].relativePath || entries[0].file.name);
@@ -691,85 +712,14 @@ export default function ScanConfigPage() {
         </div>
       </section>
 
-      {/* COMPACT INDEPENDENT SCANNING WINDOW */}
-      {scanning && (
-        <div className="compact-scan-modal-backdrop" role="dialog" aria-modal="true">
-          <div className="compact-scan-window enhanced">
-            <div className="compact-scan-topbar">
-              <div className="compact-scan-target-pill">
-                <span className="compact-pulse-dot" />
-                <span className="compact-target-name">{displayName || "Target"}</span>
-              </div>
-              <span className="compact-file-size">
-                {formatBytes(totalBytes || 0)}
-              </span>
-            </div>
-
-            <div className="compact-scan-body">
-              <div className="compact-scan-spinner-wrap">
-                <div className="compact-spinner-ring outer" />
-                <div className="compact-spinner-ring inner" />
-                <div className="compact-spinner-core">
-                  <FileCode2 size={18} className="compact-core-icon" />
-                </div>
-              </div>
-
-              <div className="compact-scan-info">
-                <div className="compact-scan-step-title animate-step" key={currentScanStepTitle}>
-                  {currentScanStepTitle}
-                </div>
-                <div className="compact-scan-sub">Deep cryptographic AST & quantum audit</div>
-              </div>
-            </div>
-
-            {/* Visual Micro-Stages Row */}
-            <div className="compact-stages-track">
-              <div className={`compact-stage-pill ${currentStepIndex >= 0 ? "active" : ""}`}>
-                <span className="stage-pill-dot" />
-                <span>Scan</span>
-              </div>
-              <div className={`compact-stage-pill ${currentStepIndex >= 1 ? "active" : ""}`}>
-                <span className="stage-pill-dot" />
-                <span>Crypto</span>
-              </div>
-              <div className={`compact-stage-pill ${currentStepIndex >= 2 ? "active" : ""}`}>
-                <span className="stage-pill-dot" />
-                <span>Thinking</span>
-              </div>
-              <div className={`compact-stage-pill ${currentStepIndex >= 3 ? "active" : ""}`}>
-                <span className="stage-pill-dot" />
-                <span>Finalize</span>
-              </div>
-            </div>
-
-            <div className="compact-scan-timing-section">
-              <div className="compact-timing-pill approx">
-                <Clock size={13} className="timer-spin" />
-                <span className="timing-label">Approx Time:</span>
-                <span className="timing-value">{approxEstimate.text}</span>
-              </div>
-              <div className="compact-timing-pill elapsed">
-                <span className="timing-label">Elapsed:</span>
-                <span className="timing-value">{elapsedSeconds.toFixed(1)}s</span>
-              </div>
-            </div>
-
-            <div className="compact-progress-bar-wrap">
-              <div
-                className="compact-progress-bar-fill animated-shimmer"
-                style={{ width: `${scanPercent}%` }}
-              />
-            </div>
-
-            {(approxEstimate.isLarge || elapsedSeconds > 12) && (
-              <div className="compact-scan-advisory">
-                <ShieldAlert size={14} className="advisory-icon" />
-                <span>Larger file detected: Deep analysis may take up to 2 mins.</span>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      {/* EXECUTIVE SCANNING WINDOW */}
+      <ScanExecutionModal
+        isOpen={scanning}
+        displayName={displayName}
+        totalBytes={totalBytes}
+        elapsedSeconds={elapsedSeconds}
+        approxEstimate={approxEstimate}
+      />
     </div>
   );
 }

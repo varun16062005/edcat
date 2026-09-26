@@ -705,12 +705,12 @@ export default function MigrationPage() {
           <table className="analysis-table migration-table">
             <thead>
               <tr>
-                <th>File Location</th>
-                <th>Current Algorithm</th>
-                <th>Artifact Hash</th>
-                <th>Quantum Issue</th>
-                <th>Recommended NIST PQC</th>
-                <th>Scenario Risk</th>
+                <th style={{ width: "30%" }}>File Location</th>
+                <th style={{ width: "16%" }}>Current Algorithm</th>
+                <th style={{ width: "20%" }}>Artifact Hash</th>
+                <th style={{ width: "13%" }}>Quantum Issue</th>
+                <th style={{ width: "12%" }}>Recommended NIST PQC</th>
+                <th style={{ width: "9%" }}>Scenario Risk</th>
               </tr>
             </thead>
             <tbody>
@@ -723,26 +723,32 @@ export default function MigrationPage() {
                   return (
                     <tr key={`${item.artifact.file}-${item.artifact.line}-${index}`}>
                       <td className="location-cell">
-                        <span className="file-path-text">{item.artifact.file || "Unknown"}</span>
+                        <span className="file-path-text" title={item.artifact.file || "Unknown"}>
+                          {item.artifact.file || "Unknown"}
+                        </span>
                         {item.artifact.line && (
                           <span className="file-line-num">:{item.artifact.line}</span>
                         )}
                       </td>
-                      <td>
-                        <strong>{item.artifact.algorithm || "Cryptographic Key"}</strong>
+                      <td className="algo-cell">
+                        <strong title={item.artifact.algorithm || "Cryptographic Key"}>
+                          {item.artifact.algorithm || "Cryptographic Key"}
+                        </strong>
                       </td>
-                      <td>
+                      <td className="hash-cell">
                         <div className="hash-display-cell">
                           <span className="hash-tag-pill" title={`SHA-256: ${artHash}`}>
                             <Hash size={10} />
                             <span>{shortHash}</span>
                           </span>
-                          <span className="hash-full-preview">{displayHash}</span>
+                          <span className="hash-full-preview" title={`Full SHA-256 Hash: ${artHash}`}>
+                            {displayHash}
+                          </span>
                           <button
                             type="button"
                             className="btn-copy-hash"
                             onClick={() => copyHash(artHash)}
-                            title="Copy SHA-256"
+                            title="Copy Full SHA-256 Hash"
                           >
                             {copiedHash === artHash ? (
                               <CheckCircle2 size={12} className="copied" />
@@ -752,13 +758,17 @@ export default function MigrationPage() {
                           </button>
                         </div>
                       </td>
-                      <td>
-                        <span className="issue-pill">{migrationIssue(item.artifact)}</span>
+                      <td className="issue-cell">
+                        <span className="issue-pill" title={migrationIssue(item.artifact)}>
+                          {migrationIssue(item.artifact)}
+                        </span>
                       </td>
                       <td className="pqc-target-cell">
-                        <strong>{item.pqcTarget || recommendedPqc(item.artifact)}</strong>
+                        <strong title={item.pqcTarget || recommendedPqc(item.artifact)}>
+                          {item.pqcTarget || recommendedPqc(item.artifact)}
+                        </strong>
                       </td>
-                      <td>
+                      <td className="risk-cell">
                         <span
                           className={`risk-badge-pill ${String(
                             item.scenarioRisk

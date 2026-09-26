@@ -30,6 +30,7 @@ import { makeEntityId } from "../context/entityIds";
 import { useEcdatContext } from "../context/useEcdatContext";
 import { scanFile, warmupBackend } from "../services/api";
 import { snapshotCurrentScan } from "../lib/artifactIntegrity";
+import ScanExecutionModal from "../components/ScanExecutionModal";
 
 import "../App.css";
 
@@ -367,6 +368,8 @@ export default function Home() {
     };
   }, [isScanning]);
 
+  const MAX_UPLOAD_BYTES = 100 * 1024 * 1024; // 100 MB hard limit
+
   const setSelectedInput = (entries, sourceType, projectName = "") => {
     if (!entries.length && sourceType !== "folder") {
       return;
@@ -376,11 +379,19 @@ export default function Home() {
     const inferredSourceType = sourceType || (
       entries.length > 1
         ? "files"
-        : getExtension(firstFile?.name) === ".zip"
+        : isArchivePath(firstFile?.name)
           ? "archive"
           : "file"
     );
     const totalBytes = entries.reduce((total, entry) => total + Number(entry.file?.size || 0), 0);
+
+    // Hard 100MB upload limit — prevents UI freeze on huge folders
+    if (totalBytes > MAX_UPLOAD_BYTES) {
+      setErrorMessage(
+        `⚠️ Upload too large (${formatBytes(totalBytes)}). Maximum allowed size is 100 MB. Please select a smaller folder or specific source files only.`
+      );
+      return;
+    }
 
     setScanInput({
       sourceType: inferredSourceType,
@@ -394,13 +405,16 @@ export default function Home() {
 
   const handleInputChange = (event) => {
     const files = Array.from(event.target.files || []);
+    if (!files.length) return;
     const hasDirectoryPaths = files.some((file) => file.webkitRelativePath);
+    const isArchive = files.length === 1 && isArchivePath(files[0]?.name);
     const entries = hasDirectoryPaths
       ? normalizeDirectoryFileList(files)
       : files.map((file) => normalizeFileEntry(file));
+    const sourceType = hasDirectoryPaths ? "folder" : isArchive ? "archive" : entries.length > 1 ? "files" : "file";
     setSelectedInput(
       entries,
-      hasDirectoryPaths ? "folder" : entries.length > 1 ? "files" : undefined,
+      sourceType,
       files.length > 1 ? `${files.length} selected files` : files[0]?.name
     );
     event.target.value = "";
@@ -408,6 +422,7 @@ export default function Home() {
 
   const handleFolderInputChange = (event) => {
     const files = Array.from(event.target.files || []);
+    if (!files.length) return;
     const entries = files.map((file) => normalizeFileEntry(
       file,
       file.webkitRelativePath || file.name
@@ -424,16 +439,18 @@ export default function Home() {
 
     try {
       const entries = await collectDroppedEntries(event.dataTransfer);
+      if (!entries.length) return;
       const firstFile = entries[0]?.file;
       const hasDirectory = Array.from(event.dataTransfer?.items || [])
         .some((item) => item.webkitGetAsEntry?.()?.isDirectory);
+      const isSingleArchive = entries.length === 1 && isArchivePath(firstFile?.name);
       const sourceType = hasDirectory
         ? "folder"
-        : entries.length > 1
-          ? "files"
-        : getExtension(firstFile?.name) === ".zip"
+        : isSingleArchive
           ? "archive"
-          : "file";
+          : entries.length > 1
+            ? "files"
+            : "file";
       setSelectedInput(
         entries,
         sourceType,
@@ -1064,85 +1081,13 @@ export default function Home() {
       </main>
 
       {/* SCAN PROCESSING OVERLAY */}
-
-      {isScanning && (
-        <div className="compact-scan-modal-backdrop" role="dialog" aria-modal="true">
-          <div className="compact-scan-window enhanced">
-            <div className="compact-scan-topbar">
-              <div className="compact-scan-target-pill">
-                <span className="compact-pulse-dot" />
-                <span className="compact-target-name">{scanInput?.displayName || "Target"}</span>
-              </div>
-              <span className="compact-file-size">
-                {formatBytes(scanInput?.totalBytes || 0)}
-              </span>
-            </div>
-
-            <div className="compact-scan-body">
-              <div className="compact-scan-spinner-wrap">
-                <div className="compact-spinner-ring outer" />
-                <div className="compact-spinner-ring inner" />
-                <div className="compact-spinner-core">
-                  <FileCode2 size={18} className="compact-core-icon" />
-                </div>
-              </div>
-
-              <div className="compact-scan-info">
-                <div className="compact-scan-step-title animate-step" key={currentScanStepTitle}>
-                  {currentScanStepTitle}
-                </div>
-                <div className="compact-scan-sub">Deep cryptographic AST & quantum audit</div>
-              </div>
-            </div>
-
-            {/* Visual Micro-Stages Row */}
-            <div className="compact-stages-track">
-              <div className={`compact-stage-pill ${currentStepIndex >= 0 ? "active" : ""}`}>
-                <span className="stage-pill-dot" />
-                <span>Scan</span>
-              </div>
-              <div className={`compact-stage-pill ${currentStepIndex >= 1 ? "active" : ""}`}>
-                <span className="stage-pill-dot" />
-                <span>Crypto</span>
-              </div>
-              <div className={`compact-stage-pill ${currentStepIndex >= 2 ? "active" : ""}`}>
-                <span className="stage-pill-dot" />
-                <span>Thinking</span>
-              </div>
-              <div className={`compact-stage-pill ${currentStepIndex >= 3 ? "active" : ""}`}>
-                <span className="stage-pill-dot" />
-                <span>Finalize</span>
-              </div>
-            </div>
-
-            <div className="compact-scan-timing-section">
-              <div className="compact-timing-pill approx">
-                <Clock size={13} className="timer-spin" />
-                <span className="timing-label">Approx Time:</span>
-                <span className="timing-value">{approxEstimate.text}</span>
-              </div>
-              <div className="compact-timing-pill elapsed">
-                <span className="timing-label">Elapsed:</span>
-                <span className="timing-value">{elapsedSeconds.toFixed(1)}s</span>
-              </div>
-            </div>
-
-            <div className="compact-progress-bar-wrap">
-              <div
-                className="compact-progress-bar-fill animated-shimmer"
-                style={{ width: `${scanPercent}%` }}
-              />
-            </div>
-
-            {(approxEstimate.isLarge || elapsedSeconds > 12) && (
-              <div className="compact-scan-advisory">
-                <ShieldAlert size={14} className="advisory-icon" />
-                <span>Larger file detected: Deep analysis may take up to 2 mins.</span>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      <ScanExecutionModal
+        isOpen={isScanning}
+        displayName={scanInput?.displayName}
+        totalBytes={scanInput?.totalBytes || 0}
+        elapsedSeconds={elapsedSeconds}
+        approxEstimate={approxEstimate}
+      />
     </div>
   );
 }

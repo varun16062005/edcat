@@ -1860,7 +1860,6 @@ function Dashboard({ discoveryOnly = false }) {
                   size={16}
                 />
               }
-              light
               tone="files-tile"
             />
 
@@ -2719,35 +2718,26 @@ function Dashboard({ discoveryOnly = false }) {
                 <thead>
 
                   <tr>
-
-                    <th>
+                    <th style={{ width: "26%" }}>
                       ASSET
                     </th>
-
-                    <th>
+                    <th style={{ width: "13%" }}>
                       KEY / MODE
                     </th>
-
-                    <th>
+                    <th style={{ width: "15%" }}>
                       QUANTUM
                     </th>
-
-                    <th>
+                    <th style={{ width: "11%" }}>
                       RISK
                     </th>
-
-                    <th>
+                    <th style={{ width: "11%" }}>
                       BUSINESS
                     </th>
-
-                    <th>
+                    <th style={{ width: "20%" }}>
                       LOCATION
                     </th>
-
-                    <th></th>
-
+                    <th style={{ width: "4%" }}></th>
                   </tr>
-
                 </thead>
 
 
