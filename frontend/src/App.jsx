@@ -15,6 +15,7 @@ import HistoryPage from "./pages/HistoryPage";
 import AdvisorPage from "./pages/AdvisorPage";
 import BlastRadiusPage from "./pages/BlastRadiusPage";
 import { EcdatProvider } from "./context/EcdatContext";
+import { ThemeProvider } from "./context/ThemeContext";
 
 import "./App.css";
 
@@ -30,8 +31,9 @@ function RequireScan({ children }) {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <EcdatProvider>
+    <ThemeProvider>
+      <BrowserRouter>
+        <EcdatProvider>
         <Routes>
           {/* Landing / Scan Configuration in Homepage (minimal side rail) */}
           <Route path="/" element={<HomePage />} />
@@ -117,5 +119,6 @@ export default function App() {
         </Routes>
       </EcdatProvider>
     </BrowserRouter>
+  </ThemeProvider>
   );
 }

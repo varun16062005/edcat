@@ -9,7 +9,6 @@ import {
   MessageCircle,
   Route as RouteIcon,
   ShieldAlert,
-  Sun,
   Target,
   Upload,
   X,
@@ -184,14 +183,6 @@ export default function AppShell() {
               <GlobalSearch variant="dashboard" />
             </div>
 
-            <button
-              type="button"
-              className="topbar-action-btn"
-              title="Toggle Theme"
-              aria-label="Toggle Theme"
-            >
-              <Sun size={15} />
-            </button>
 
             <button
               type="button"

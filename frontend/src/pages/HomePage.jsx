@@ -1,5 +1,5 @@
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Activity,
   ArrowRight,
@@ -9,6 +9,8 @@ import {
   Clock,
   FileArchive,
   FileCode2,
+  FolderOpen,
+  HardDrive,
   History,
   Layers,
   Loader2,
@@ -145,15 +147,12 @@ function isSupportedClientFile(file, relativePath) {
 
 function normalizeFileEntry(file, relativePath) {
   const path = safeRelativePath(relativePath || file?.name);
-  const tooLarge = Number(file?.size || 0) > MAX_TEXT_FILE_SIZE &&
-    isSupportedClientFile(file, path) &&
-    isTextAnalysisCandidate(file, path);
 
   return {
     file,
     relativePath: path,
     isSupported: isSupportedClientFile(file, path),
-    skipReason: tooLarge ? "Text file exceeds 10 MB analysis limit" : "",
+    skipReason: "",
   };
 }
 
@@ -305,24 +304,61 @@ export default function Home() {
   const [elapsedSeconds, setElapsedSeconds] =
     useState(0);
 
-  const [scanStage, setScanStage] =
-    useState(0);
-
-  const [scanActivityIndex, setScanActivityIndex] =
-    useState(0);
-
   const [errorMessage, setErrorMessage] =
     useState("");
 
   const [warmupStatus, setWarmupStatus] =
     useState("");
 
-  // Live Time Loading timer
+  // Approximate time calculation based on memory of the file (guaranteed 7-10s pacing)
+  const approxEstimate = useMemo(() => {
+    const bytes = scanInput?.totalBytes || 0;
+    const mb = bytes / (1024 * 1024);
+    if (mb <= 0.5) return { text: "~7–8s", targetSec: 8.0, isLarge: false };
+    if (mb <= 3) return { text: "~7–9s", targetSec: 8.5, isLarge: false };
+    if (mb <= 10) return { text: "~8–10s", targetSec: 9.2, isLarge: false };
+    if (mb <= 25) return { text: "~10–14s", targetSec: 12.0, isLarge: false };
+    if (mb <= 60) return { text: "~18–30s", targetSec: 25.0, isLarge: true };
+    if (mb <= 100) return { text: "~35–55s", targetSec: 45.0, isLarge: true };
+    return { text: "~1–2 mins", targetSec: 90.0, isLarge: true };
+  }, [scanInput?.totalBytes]);
+
+  const currentStepIndex = useMemo(() => {
+    const target = approxEstimate.targetSec;
+    const ratio = Math.min(1, elapsedSeconds / target);
+    if (ratio < 0.30) return 0;
+    if (ratio < 0.65) return 1;
+    if (ratio < 0.88) return 2;
+    return 3;
+  }, [approxEstimate.targetSec, elapsedSeconds]);
+
+  // Clean sequential steps without infinite looping
+  const currentScanStepTitle = useMemo(() => {
+    if (currentStepIndex === 0) return "Scanning project files...";
+    if (currentStepIndex === 1) return "Searching for cryptographic files...";
+    if (currentStepIndex === 2) return "Thinking...";
+    return "Finalizing security intelligence...";
+  }, [currentStepIndex]);
+
+  const scanPercent = useMemo(() => {
+    const target = approxEstimate.targetSec;
+    const ratio = Math.min(0.98, (elapsedSeconds / target) * 0.96);
+    return Math.max(8, Math.round(ratio * 100));
+  }, [approxEstimate.targetSec, elapsedSeconds]);
+
+  // Live Timer with strict 2-minute (120s) safety cutoff
   useEffect(() => {
     if (!isScanning) return;
     const startTime = performance.now();
     const timerInterval = setInterval(() => {
-      setElapsedSeconds((performance.now() - startTime) / 1000);
+      const elapsed = (performance.now() - startTime) / 1000;
+      setElapsedSeconds(elapsed);
+      if (elapsed >= 120) {
+        setIsScanning(false);
+        setErrorMessage(
+          "Scan exceeded 2-minute limit. The repository or archive may contain deep recursion or unsupported binaries. Please select specific source files or smaller archives."
+        );
+      }
     }, 60);
 
     return () => {
@@ -345,11 +381,6 @@ export default function Home() {
           : "file"
     );
     const totalBytes = entries.reduce((total, entry) => total + Number(entry.file?.size || 0), 0);
-    if (totalBytes > MAX_TOTAL_UPLOAD_SIZE) {
-      setScanInput(null);
-      setErrorMessage("Upload exceeds the ECDAT project size limit of 500 MB.");
-      return;
-    }
 
     setScanInput({
       sourceType: inferredSourceType,
@@ -415,48 +446,6 @@ export default function Home() {
     }
   };
 
-  const startStageAnimation = () => {
-    setScanStage(0);
-    setScanActivityIndex(0);
-    if (stageTimerRef.current) {
-      clearInterval(stageTimerRef.current);
-    }
-    if (activityTimerRef.current) {
-      clearInterval(activityTimerRef.current);
-    }
-    stageTimerRef.current =
-      setInterval(() => {
-        setScanStage((current) => {
-          if (
-            current >=
-            SCAN_STAGES.length - 1
-          ) {
-            return current;
-          }
-
-          return current + 1;
-        });
-      }, 1250);
-
-    activityTimerRef.current =
-      setInterval(() => {
-        setScanActivityIndex((current) => (
-          (current + 1) % SCAN_ACTIVITY_MESSAGES.length
-        ));
-      }, 850);
-  };
-
-  const stopStageAnimation = () => {
-    if (stageTimerRef.current) {
-      clearInterval(stageTimerRef.current);
-      stageTimerRef.current = null;
-    }
-    if (activityTimerRef.current) {
-      clearInterval(activityTimerRef.current);
-      activityTimerRef.current = null;
-    }
-  };
-
   const startScan = async () => {
     if (!scanInput || isScanning) {
       return;
@@ -466,36 +455,20 @@ export default function Home() {
     setErrorMessage("");
     setWarmupStatus("");
 
-    // ── Step 1: Warm up the backend (handles Render cold-start) ──
-    // For large files (> 5 MB) we always ping first to wake the server.
-    // This prevents the upload from timing out mid-way on a sleeping instance.
+    // Step 1: Warm up backend for large uploads (> 5 MB) if on sleeping instance
     const isLargeUpload = (scanInput.totalBytes || 0) > 5 * 1024 * 1024;
     if (isLargeUpload) {
       await warmupBackend((msg) => setWarmupStatus(msg));
     }
     setWarmupStatus("");
 
-    // ── Step 2: Start scan animation and run the actual scan ──
-    startStageAnimation();
-
-    const minimumDisplayTime = 7600;
-    const startedAt = Date.now();
-
+    // Step 2: Ensure any file scan waits 7-10 seconds to enter dashboard
+    const minWaitMs = Math.min(10000, Math.max(7800, Math.round(approxEstimate.targetSec * 1000)));
     try {
-      const result = await Promise.all([
+      const [result] = await Promise.all([
         scanFile(scanInput),
-        sleep(minimumDisplayTime),
-      ]).then(([scanResult]) => scanResult);
-
-      const elapsed = Date.now() - startedAt;
-
-      if (elapsed < minimumDisplayTime) {
-        await sleep(
-          minimumDisplayTime - elapsed
-        );
-      }
-
-      setScanStage(SCAN_STAGES.length - 1);
+        sleep(minWaitMs),
+      ]);
 
       sessionStorage.setItem(
         CURRENT_SCAN_KEY,
@@ -523,10 +496,9 @@ export default function Home() {
 
       snapshotCurrentScan(result);
 
-      stopStageAnimation();
+      await sleep(350);
 
-      await sleep(500);
-
+      setIsScanning(false);
       navigate("/dashboard", {
         state: {
           scanResult: result,
@@ -534,12 +506,10 @@ export default function Home() {
       });
     } catch (error) {
       console.error(error);
-
-      stopStageAnimation();
-
+      setIsScanning(false);
       setErrorMessage(
         error.message ||
-          "Unable to connect to the ECDAT scanner."
+        "The scan failed to complete. Please try selecting the files directly."
       );
     } finally {
       setIsScanning(false);
@@ -634,8 +604,10 @@ export default function Home() {
         <header className="home-topbar">
           <GlobalSearch variant="home" />
 
-          <div className="workspace-label">
-            Cryptographic Discovery & Assessment
+          <div className="home-topbar-right">
+            <div className="workspace-label">
+              Cryptographic Discovery & Assessment
+            </div>
           </div>
         </header>
 
@@ -645,14 +617,14 @@ export default function Home() {
           <section className="home-hero">
             <div className="hero-main-content">
               <div className="hero-kicker">
-                <span></span>
+                <span className="hero-kicker-dot"></span>
                 ECDAT · CRYPTOGRAPHIC DISCOVERY PLATFORM
               </div>
 
               <h1>
                 Discover.
                 <br />
-                <span>Assess.</span>
+                <span className="hero-heading-highlight">Assess.</span>
                 <br />
                 Prepare.
               </h1>
@@ -684,27 +656,43 @@ export default function Home() {
             </div>
 
             <div className="hero-visual">
-              <div className="hero-orbit orbit-a"></div>
-              <div className="hero-orbit orbit-b"></div>
-              <div className="hero-orbit orbit-c"></div>
+              <div className="hero-security-card">
+                <div className="security-card-header">
+                  <div className="security-card-title-row">
+                    <ShieldCheck size={18} className="security-card-icon" />
+                    <strong>Cryptographic Posture Matrix</strong>
+                  </div>
+                  <span className="security-badge-standard">ECDAT Verified</span>
+                </div>
 
-              <div className="hero-center-shield">
-                <ShieldCheck size={34} />
-              </div>
+                <div className="security-card-grid">
+                  <div className="security-card-cell">
+                    <LockKeyhole size={15} className="cell-icon" />
+                    <div className="cell-text">
+                      <small>Inventory Focus</small>
+                      <span>Crypto Assets & Keys</span>
+                    </div>
+                  </div>
+                  <div className="security-card-cell">
+                    <ShieldAlert size={15} className="cell-icon" />
+                    <div className="cell-text">
+                      <small>Threat Model</small>
+                      <span>Post-Quantum Exposure</span>
+                    </div>
+                  </div>
+                  <div className="security-card-cell">
+                    <Network size={15} className="cell-icon" />
+                    <div className="cell-text">
+                      <small>Methodology</small>
+                      <span>AST & CBOM Pipeline</span>
+                    </div>
+                  </div>
+                </div>
 
-              <div className="hero-floating-card card-one">
-                <LockKeyhole size={15} />
-                <span>Crypto assets</span>
-              </div>
-
-              <div className="hero-floating-card card-two">
-                <ShieldAlert size={15} />
-                <span>Quantum risk</span>
-              </div>
-
-              <div className="hero-floating-card card-three">
-                <Network size={15} />
-                <span>Discovery</span>
+                <div className="security-card-footer">
+                  <span className="security-pulse-indicator" />
+                  <span>Standard Corporate & Enterprise Security Inspection</span>
+                </div>
               </div>
             </div>
           </section>
@@ -830,13 +818,22 @@ export default function Home() {
 
                     <div className="upload-choice-actions">
                       <button
+                        type="button"
                         className="upload-button"
                         onClick={() => fileInputRef.current?.click()}
-                        onDoubleClick={() => folderInputRef.current?.click()}
-                        title="Click to select files. Double-click to select a folder."
+                        title="Click to select files or archives"
                       >
-                        <Upload size={15} />
-                        Upload / Select
+                        <FileCode2 size={16} />
+                        Select Files
+                      </button>
+                      <button
+                        type="button"
+                        className="upload-button folder-button"
+                        onClick={() => folderInputRef.current?.click()}
+                        title="Click to select an entire project folder"
+                      >
+                        <FolderOpen size={16} />
+                        Select Folder
                       </button>
                     </div>
 
@@ -905,6 +902,7 @@ export default function Home() {
                         ))}
                       </div>
                     )}
+
 
                     <div className="selected-actions">
                       <button
@@ -1068,73 +1066,80 @@ export default function Home() {
       {/* SCAN PROCESSING OVERLAY */}
 
       {isScanning && (
-        <div className="scan-progress-modal-backdrop" role="dialog" aria-modal="true">
-          <div className="scan-progress-modal">
-            {/* Animated Radar Scanning Orb */}
-            <div className="scan-radar-visual">
-              <div className="scan-radar-ring ring-1" />
-              <div className="scan-radar-ring ring-2" />
-              <div className="scan-radar-ring ring-3" />
-              <div className="scan-radar-sweep" />
-              <div className="scan-radar-core">
-                <FileCode2 size={24} className="scan-core-icon" />
+        <div className="compact-scan-modal-backdrop" role="dialog" aria-modal="true">
+          <div className="compact-scan-window enhanced">
+            <div className="compact-scan-topbar">
+              <div className="compact-scan-target-pill">
+                <span className="compact-pulse-dot" />
+                <span className="compact-target-name">{scanInput?.displayName || "Target"}</span>
+              </div>
+              <span className="compact-file-size">
+                {formatBytes(scanInput?.totalBytes || 0)}
+              </span>
+            </div>
+
+            <div className="compact-scan-body">
+              <div className="compact-scan-spinner-wrap">
+                <div className="compact-spinner-ring outer" />
+                <div className="compact-spinner-ring inner" />
+                <div className="compact-spinner-core">
+                  <FileCode2 size={18} className="compact-core-icon" />
+                </div>
+              </div>
+
+              <div className="compact-scan-info">
+                <div className="compact-scan-step-title animate-step" key={currentScanStepTitle}>
+                  {currentScanStepTitle}
+                </div>
+                <div className="compact-scan-sub">Deep cryptographic AST & quantum audit</div>
               </div>
             </div>
 
-            <div className="scan-progress-header">
-              <div className="scan-timer-pill">
-                <Clock size={14} className="timer-spin" />
-                <span>Time Loading: {elapsedSeconds.toFixed(1)}s</span>
+            {/* Visual Micro-Stages Row */}
+            <div className="compact-stages-track">
+              <div className={`compact-stage-pill ${currentStepIndex >= 0 ? "active" : ""}`}>
+                <span className="stage-pill-dot" />
+                <span>Scan</span>
               </div>
-              <h3 className="scan-live-title">{SCAN_STAGES[scanStage]?.title || "Analyzing..."}</h3>
-              <p className="scan-live-message">
-                {SCAN_ACTIVITY_MESSAGES[scanActivityIndex]}
-              </p>
+              <div className={`compact-stage-pill ${currentStepIndex >= 1 ? "active" : ""}`}>
+                <span className="stage-pill-dot" />
+                <span>Crypto</span>
+              </div>
+              <div className={`compact-stage-pill ${currentStepIndex >= 2 ? "active" : ""}`}>
+                <span className="stage-pill-dot" />
+                <span>Thinking</span>
+              </div>
+              <div className={`compact-stage-pill ${currentStepIndex >= 3 ? "active" : ""}`}>
+                <span className="stage-pill-dot" />
+                <span>Finalize</span>
+              </div>
             </div>
 
-            {/* Dynamic Progress Bar */}
-            <div className="scan-progress-bar-wrap">
+            <div className="compact-scan-timing-section">
+              <div className="compact-timing-pill approx">
+                <Clock size={13} className="timer-spin" />
+                <span className="timing-label">Approx Time:</span>
+                <span className="timing-value">{approxEstimate.text}</span>
+              </div>
+              <div className="compact-timing-pill elapsed">
+                <span className="timing-label">Elapsed:</span>
+                <span className="timing-value">{elapsedSeconds.toFixed(1)}s</span>
+              </div>
+            </div>
+
+            <div className="compact-progress-bar-wrap">
               <div
-                className="scan-progress-bar-fill"
-                style={{
-                  width: `${Math.min(100, Math.round(((scanStage + 1) / SCAN_STAGES.length) * 100))}%`,
-                }}
+                className="compact-progress-bar-fill animated-shimmer"
+                style={{ width: `${scanPercent}%` }}
               />
             </div>
-            <div className="scan-progress-meta-row">
-              <span>Target: <strong>{scanInput?.displayName || "Project"}</strong></span>
-              <span>{Math.min(100, Math.round(((scanStage + 1) / SCAN_STAGES.length) * 100))}%</span>
-            </div>
 
-            {/* Stages List */}
-            <div className="scan-stages-stepper">
-              {SCAN_STAGES.map((stage, idx) => {
-                const isComplete = idx < scanStage;
-                const isCurrent = idx === scanStage;
-                return (
-                  <div
-                    key={stage.title}
-                    className={`scan-stage-step ${isComplete ? "complete" : ""} ${
-                      isCurrent ? "current" : ""
-                    }`}
-                  >
-                    <div className="step-indicator">
-                      {isComplete ? (
-                        <Check size={14} className="check-icon" />
-                      ) : isCurrent ? (
-                        <Loader2 size={13} className="step-spinner spin-active" />
-                      ) : (
-                        <span>{idx + 1}</span>
-                      )}
-                    </div>
-                    <div className="step-content">
-                      <span className="step-label">{stage.title}</span>
-                      <small className="step-detail">{stage.detail}</small>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            {(approxEstimate.isLarge || elapsedSeconds > 12) && (
+              <div className="compact-scan-advisory">
+                <ShieldAlert size={14} className="advisory-icon" />
+                <span>Larger file detected: Deep analysis may take up to 2 mins.</span>
+              </div>
+            )}
           </div>
         </div>
       )}

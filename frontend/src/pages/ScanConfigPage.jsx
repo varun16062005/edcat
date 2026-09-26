@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowRight,
   Check,
@@ -6,6 +6,7 @@ import {
   FileArchive,
   FileCode2,
   FolderOpen,
+  HardDrive,
   Loader2,
   ShieldAlert,
   Upload,
@@ -123,16 +124,12 @@ function isSupportedClientFile(file, relativePath) {
 
 function normalizeFileEntry(file, relativePath) {
   const path = safeRelativePath(relativePath || file?.name);
-  const tooLarge =
-    Number(file?.size || 0) > MAX_TEXT_FILE_SIZE &&
-    isSupportedClientFile(file, path) &&
-    !isArchivePath(path);
 
   return {
     file,
     relativePath: path,
     isSupported: isSupportedClientFile(file, path),
-    skipReason: tooLarge ? "Text file exceeds 10 MB analysis limit" : "",
+    skipReason: "",
   };
 }
 
@@ -267,34 +264,59 @@ export default function ScanConfigPage() {
   const displayLanguages =
     detectedLanguages.length > 0 ? detectedLanguages.join(", ") : "Ready";
 
-  // Live Time Loading timer
+  // Approximate time calculation based on memory of the file (guaranteed 7-10s pacing)
+  const approxEstimate = useMemo(() => {
+    const mb = totalBytes / (1024 * 1024);
+    if (mb <= 0.5) return { text: "~7–8s", targetSec: 8.0, isLarge: false };
+    if (mb <= 3) return { text: "~7–9s", targetSec: 8.5, isLarge: false };
+    if (mb <= 10) return { text: "~8–10s", targetSec: 9.2, isLarge: false };
+    if (mb <= 25) return { text: "~10–14s", targetSec: 12.0, isLarge: false };
+    if (mb <= 60) return { text: "~18–30s", targetSec: 25.0, isLarge: true };
+    if (mb <= 100) return { text: "~35–55s", targetSec: 45.0, isLarge: true };
+    return { text: "~1–2 mins", targetSec: 90.0, isLarge: true };
+  }, [totalBytes]);
+
+  const currentStepIndex = useMemo(() => {
+    const target = approxEstimate.targetSec;
+    const ratio = Math.min(1, elapsedSeconds / target);
+    if (ratio < 0.30) return 0;
+    if (ratio < 0.65) return 1;
+    if (ratio < 0.88) return 2;
+    return 3;
+  }, [approxEstimate.targetSec, elapsedSeconds]);
+
+  // Clean sequential steps without infinite looping
+  const currentScanStepTitle = useMemo(() => {
+    if (currentStepIndex === 0) return "Scanning project files...";
+    if (currentStepIndex === 1) return "Searching for cryptographic files...";
+    if (currentStepIndex === 2) return "Thinking...";
+    return "Finalizing security intelligence...";
+  }, [currentStepIndex]);
+
+  const scanPercent = useMemo(() => {
+    const target = approxEstimate.targetSec;
+    const ratio = Math.min(0.98, (elapsedSeconds / target) * 0.96);
+    return Math.max(8, Math.round(ratio * 100));
+  }, [approxEstimate.targetSec, elapsedSeconds]);
+
+  // Live Timer with strict 2-minute (120s) safety cutoff
   useEffect(() => {
     if (!scanning) return;
     const startTime = performance.now();
     const timerInterval = setInterval(() => {
-      setElapsedSeconds((performance.now() - startTime) / 1000);
+      const elapsed = (performance.now() - startTime) / 1000;
+      setElapsedSeconds(elapsed);
+      if (elapsed >= 120) {
+        setScanning(false);
+        setErrorMessage(
+          "Scan exceeded the 2-minute safety limit. The repository or archive may contain deep recursion or large compiled artifacts. Please select specific source files or smaller archives."
+        );
+      }
     }, 60);
 
     return () => {
       clearInterval(timerInterval);
       setElapsedSeconds(0);
-    };
-  }, [scanning]);
-
-  // Staged scan animation timers
-  useEffect(() => {
-    if (!scanning) return;
-    const stageInterval = setInterval(() => {
-      setScanStageIndex((curr) => (curr < SCAN_STAGES.length - 1 ? curr + 1 : curr));
-    }, 850);
-
-    const messageInterval = setInterval(() => {
-      setScanMessageIndex((curr) => (curr + 1) % SCAN_ACTIVITY_MESSAGES.length);
-    }, 1100);
-
-    return () => {
-      clearInterval(stageInterval);
-      clearInterval(messageInterval);
     };
   }, [scanning]);
 
@@ -366,11 +388,6 @@ export default function ScanConfigPage() {
       return;
     }
 
-    if (totalBytes > MAX_TOTAL_UPLOAD_SIZE) {
-      setErrorMessage(`Total upload size exceeds limit of ${formatBytes(MAX_TOTAL_UPLOAD_SIZE)}.`);
-      return;
-    }
-
     setScanning(true);
     setScanStageIndex(0);
     setScanMessageIndex(0);
@@ -384,8 +401,9 @@ export default function ScanConfigPage() {
         files: selectedEntries,
       };
 
-      // Guarantee minimum duration (4.0s) so the user experiences the live loading timer & all 4 statements
-      const minDurationPromise = new Promise((resolve) => setTimeout(resolve, 4000));
+      // Ensure any file scan waits 7-10 seconds to enter dashboard
+      const minWaitMs = Math.min(10000, Math.max(7800, Math.round(approxEstimate.targetSec * 1000)));
+      const minDurationPromise = new Promise((resolve) => setTimeout(resolve, minWaitMs));
       const [result] = await Promise.all([
         scanFile(scanInput),
         minDurationPromise,
@@ -545,7 +563,7 @@ export default function ScanConfigPage() {
               <Upload size={32} className="dropzone-icon" />
             </div>
             <h3>Drop your project, archive, or certificate files here</h3>
-            <p>Supports single files, multiple files, folders, and ZIP / TAR archives up to 500 MB</p>
+            <p>Supports single files, multiple files, folders, and ZIP / TAR archives</p>
 
             <div className="dropzone-button-group">
               <button
@@ -641,22 +659,22 @@ export default function ScanConfigPage() {
           </div>
         )}
 
-        {/* Action Bar (matching Cancel & Start Scan from Scanpage.png) */}
         <div className="scan-action-bar">
-          <button
-            type="button"
-            className="btn-cancel"
-            onClick={handleClearSelection}
-            disabled={scanning || !selectedEntries.length}
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            className="btn-start-scan"
-            onClick={handleStartScan}
-            disabled={scanning || !selectedEntries.length}
-          >
+          <div style={{ display: "flex", gap: "12px", alignItems: "center", marginLeft: "auto" }}>
+            <button
+              type="button"
+              className="btn-cancel"
+              onClick={handleClearSelection}
+              disabled={scanning || !selectedEntries.length}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="btn-start-scan"
+              onClick={handleStartScan}
+              disabled={scanning || !selectedEntries.length}
+            >
             {scanning ? (
               <>
                 <span className="spinner" />
@@ -669,78 +687,86 @@ export default function ScanConfigPage() {
               </>
             )}
           </button>
+          </div>
         </div>
       </section>
 
-      {/* Staged Scan Animation Modal / Overlay */}
+      {/* COMPACT INDEPENDENT SCANNING WINDOW */}
       {scanning && (
-        <div className="scan-progress-modal-backdrop" role="dialog" aria-modal="true">
-          <div className="scan-progress-modal">
-            {/* Animated Radar Scanning Orb */}
-            <div className="scan-radar-visual">
-              <div className="scan-radar-ring ring-1" />
-              <div className="scan-radar-ring ring-2" />
-              <div className="scan-radar-ring ring-3" />
-              <div className="scan-radar-sweep" />
-              <div className="scan-radar-core">
-                <FileCode2 size={24} className="scan-core-icon" />
+        <div className="compact-scan-modal-backdrop" role="dialog" aria-modal="true">
+          <div className="compact-scan-window enhanced">
+            <div className="compact-scan-topbar">
+              <div className="compact-scan-target-pill">
+                <span className="compact-pulse-dot" />
+                <span className="compact-target-name">{displayName || "Target"}</span>
+              </div>
+              <span className="compact-file-size">
+                {formatBytes(totalBytes || 0)}
+              </span>
+            </div>
+
+            <div className="compact-scan-body">
+              <div className="compact-scan-spinner-wrap">
+                <div className="compact-spinner-ring outer" />
+                <div className="compact-spinner-ring inner" />
+                <div className="compact-spinner-core">
+                  <FileCode2 size={18} className="compact-core-icon" />
+                </div>
+              </div>
+
+              <div className="compact-scan-info">
+                <div className="compact-scan-step-title animate-step" key={currentScanStepTitle}>
+                  {currentScanStepTitle}
+                </div>
+                <div className="compact-scan-sub">Deep cryptographic AST & quantum audit</div>
               </div>
             </div>
 
-            <div className="scan-progress-header">
-              <div className="scan-timer-pill">
-                <Clock size={14} className="timer-spin" />
-                <span>Time Loading: {elapsedSeconds.toFixed(1)}s</span>
+            {/* Visual Micro-Stages Row */}
+            <div className="compact-stages-track">
+              <div className={`compact-stage-pill ${currentStepIndex >= 0 ? "active" : ""}`}>
+                <span className="stage-pill-dot" />
+                <span>Scan</span>
               </div>
-              <h3 className="scan-live-title">{SCAN_STAGES[scanStageIndex]?.title || "Analyzing..."}</h3>
-              <p className="scan-live-message">
-                {SCAN_ACTIVITY_MESSAGES[scanMessageIndex]}
-              </p>
+              <div className={`compact-stage-pill ${currentStepIndex >= 1 ? "active" : ""}`}>
+                <span className="stage-pill-dot" />
+                <span>Crypto</span>
+              </div>
+              <div className={`compact-stage-pill ${currentStepIndex >= 2 ? "active" : ""}`}>
+                <span className="stage-pill-dot" />
+                <span>Thinking</span>
+              </div>
+              <div className={`compact-stage-pill ${currentStepIndex >= 3 ? "active" : ""}`}>
+                <span className="stage-pill-dot" />
+                <span>Finalize</span>
+              </div>
             </div>
 
-            {/* Dynamic Progress Bar */}
-            <div className="scan-progress-bar-wrap">
+            <div className="compact-scan-timing-section">
+              <div className="compact-timing-pill approx">
+                <Clock size={13} className="timer-spin" />
+                <span className="timing-label">Approx Time:</span>
+                <span className="timing-value">{approxEstimate.text}</span>
+              </div>
+              <div className="compact-timing-pill elapsed">
+                <span className="timing-label">Elapsed:</span>
+                <span className="timing-value">{elapsedSeconds.toFixed(1)}s</span>
+              </div>
+            </div>
+
+            <div className="compact-progress-bar-wrap">
               <div
-                className="scan-progress-bar-fill"
-                style={{
-                  width: `${Math.min(100, Math.round(((scanStageIndex + 1) / SCAN_STAGES.length) * 100))}%`,
-                }}
+                className="compact-progress-bar-fill animated-shimmer"
+                style={{ width: `${scanPercent}%` }}
               />
             </div>
-            <div className="scan-progress-meta-row">
-              <span>Target: <strong>{displayName}</strong></span>
-              <span>{Math.min(100, Math.round(((scanStageIndex + 1) / SCAN_STAGES.length) * 100))}%</span>
-            </div>
 
-            {/* Stages List */}
-            <div className="scan-stages-stepper">
-              {SCAN_STAGES.map((stage, idx) => {
-                const isComplete = idx < scanStageIndex;
-                const isCurrent = idx === scanStageIndex;
-                return (
-                  <div
-                    key={stage.title}
-                    className={`scan-stage-step ${isComplete ? "complete" : ""} ${
-                      isCurrent ? "current" : ""
-                    }`}
-                  >
-                    <div className="step-indicator">
-                      {isComplete ? (
-                        <Check size={14} className="check-icon" />
-                      ) : isCurrent ? (
-                        <Loader2 size={13} className="step-spinner spin-active" />
-                      ) : (
-                        <span>{idx + 1}</span>
-                      )}
-                    </div>
-                    <div className="step-content">
-                      <span className="step-label">{stage.title}</span>
-                      <small className="step-detail">{stage.detail}</small>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            {(approxEstimate.isLarge || elapsedSeconds > 12) && (
+              <div className="compact-scan-advisory">
+                <ShieldAlert size={14} className="advisory-icon" />
+                <span>Larger file detected: Deep analysis may take up to 2 mins.</span>
+              </div>
+            )}
           </div>
         </div>
       )}
