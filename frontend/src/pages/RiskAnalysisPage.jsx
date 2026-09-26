@@ -94,8 +94,11 @@ export default function RiskAnalysisPage() {
                       type="button"
                       key={`${criticality}-${urgency}`}
                       className={`mosca-cell cell-${criticality.toLowerCase()}-${urgency.toLowerCase()} ${selected ? "selected" : ""}`}
-                      onClick={() => { setFilter({ criticality, urgency }); setPage(1); }}
-                      title={`${criticality} Criticality / ${urgency} Urgency: ${count} finding${count === 1 ? "" : "s"}`}
+                      onClick={() => {
+                        setFilter((prev) => (prev?.criticality === criticality && prev?.urgency === urgency ? null : { criticality, urgency }));
+                        setPage(1);
+                      }}
+                      title={`${criticality} Criticality / ${urgency} Urgency: ${count} finding${count === 1 ? "" : "s"}${selected ? " (Click to clear filter)" : ""}`}
                     >
                       <strong>{count}</strong>
                       <span>{count === 1 ? "finding" : "findings"}</span>
@@ -110,6 +113,20 @@ export default function RiskAnalysisPage() {
               <div>
                 <h2>Priority-ranked findings</h2>
                 <p>X = data lifetime, Y = migration time, Z = years until the assumed quantum era. Unavailable fields use documented fallbacks.</p>
+                {filter && (
+                  <div className="active-matrix-filter-pill" style={{ marginTop: "6px" }}>
+                    <span>Showing <strong>{filter.criticality} Criticality / {filter.urgency} Urgency</strong></span>
+                    <button
+                      type="button"
+                      className="btn-clear-matrix-pill"
+                      onClick={() => setFilter(null)}
+                      title="Clear filter"
+                      aria-label="Clear filter"
+                    >
+                      ×
+                    </button>
+                  </div>
+                )}
               </div>
               <input
                 className="analysis-search"

@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Camera,
   CheckCircle2,
@@ -7,6 +7,7 @@ import {
   Eye,
   Hash,
   Info,
+  Maximize2,
   Minus,
   Plus,
   RotateCcw,
@@ -325,9 +326,44 @@ export default function BlastRadiusPage() {
     setIsDragging(false);
   };
 
+  const fitDagView = useCallback(() => {
+    const viewport = canvasRef.current;
+    if (!viewport) return;
+    const paddingX = 24;
+    const paddingY = 24;
+    const availW = Math.max(200, viewport.clientWidth - paddingX);
+    const availH = Math.max(200, viewport.clientHeight - paddingY);
+    const fitScale = Math.min(availW / 980, availH / 940, 1);
+    const targetScale = Math.max(0.35, Math.round(fitScale * 100) / 100);
+    setZoom(targetScale);
+    const scaledW = 980 * targetScale;
+    const scaledH = 940 * targetScale;
+    const offsetX = Math.max(0, (viewport.clientWidth - scaledW) / 2);
+    const offsetY = Math.max(0, (viewport.clientHeight - scaledH) / 2);
+    setPan({ x: Math.round(offsetX), y: Math.round(offsetY) });
+  }, []);
+
+  useEffect(() => {
+    fitDagView();
+    const handleResize = () => fitDagView();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [fitDagView, graph.nodes.length]);
+
+  useEffect(() => {
+    const el = canvasRef.current;
+    if (!el) return;
+    const onWheel = (e) => {
+      e.preventDefault();
+      const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
+      setZoom((curr) => Math.min(2.0, Math.max(0.3, Math.round(curr * zoomFactor * 100) / 100)));
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, []);
+
   const handleResetZoom = () => {
-    setZoom(1);
-    setPan({ x: 0, y: 0 });
+    fitDagView();
   };
 
   const copyHashToClipboard = (hash) => {
@@ -656,7 +692,7 @@ export default function BlastRadiusPage() {
                 <button
                   type="button"
                   className="zoom-btn"
-                  onClick={() => setZoom((z) => Math.max(0.6, z - 0.1))}
+                  onClick={() => setZoom((z) => Math.max(0.35, z - 0.1))}
                   aria-label="Zoom Out"
                 >
                   <Minus size={13} />
@@ -674,9 +710,19 @@ export default function BlastRadiusPage() {
                   type="button"
                   className="zoom-btn"
                   onClick={handleResetZoom}
-                  aria-label="Reset View"
+                  title="Fit & Reset View"
+                  aria-label="Fit & Reset View"
                 >
                   <RotateCcw size={13} />
+                </button>
+                <button
+                  type="button"
+                  className="zoom-btn"
+                  onClick={fitDagView}
+                  title="Fit DAG to Viewport"
+                  aria-label="Fit DAG to Viewport"
+                >
+                  <Maximize2 size={13} />
                 </button>
               </div>
             </div>
@@ -695,6 +741,7 @@ export default function BlastRadiusPage() {
               className="dag-canvas-content"
               style={{
                 transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+                transformOrigin: "0 0",
                 width: 980,
                 height: 940,
               }}
@@ -926,7 +973,15 @@ export default function BlastRadiusPage() {
               {downstreamList.length > 0 ? (
                 <ul className="dependent-nodes-list downstream-dependents-list">
                   {downstreamList.map(({ node, type }) => (
-                    <li key={node.id} className="dependent-node-item">
+                    <li
+                      key={node.id}
+                      className="dependent-node-item"
+                      onClick={() => setSelectedNodeId(node.id)}
+                      title={`Inspect blast radius for ${node.name}`}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setSelectedNodeId(node.id); }}
+                    >
                       <span className="downstream-marker" />
                       <span className="dependent-name">{node.name}</span>
                       <span className="dependent-badge">{node.tier} {type}</span>
@@ -950,7 +1005,15 @@ export default function BlastRadiusPage() {
               {upstreamList.length > 0 ? (
                 <ul className="dependent-nodes-list">
                   {upstreamList.map((node) => (
-                    <li key={node.id} className="dependent-node-item">
+                    <li
+                      key={node.id}
+                      className="dependent-node-item"
+                      onClick={() => setSelectedNodeId(node.id)}
+                      title={`Inspect blast radius for ${node.name}`}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setSelectedNodeId(node.id); }}
+                    >
                       <span className="upstream-marker" />
                       <span className="dependent-name">{node.name}</span>
                       <span className="dependent-badge">{node.tier} Upstream</span>

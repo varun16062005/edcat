@@ -265,6 +265,7 @@ export default function DependencyExplorer({
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
   const dragStart = useRef(null);
+  const graphViewportRef = useRef(null);
 
   const model = dependencies || { nodes: [], edges: [], meta: {} };
   const nodes = useMemo(() => {
@@ -385,9 +386,46 @@ export default function DependencyExplorer({
     });
   };
 
+  const fitGraphView = useCallback(() => {
+    const viewport = graphViewportRef.current;
+    if (!viewport) return;
+    const paddingX = 40;
+    const paddingY = 40;
+    const availW = Math.max(200, viewport.clientWidth - paddingX);
+    const availH = Math.max(200, viewport.clientHeight - paddingY);
+    const fitScale = Math.min(1, availW / layout.width, availH / layout.height);
+    const targetScale = Math.max(0.35, fitScale);
+    setScale(targetScale);
+    const scaledW = layout.width * targetScale;
+    const scaledH = layout.height * targetScale;
+    const offsetX = Math.max(0, (viewport.clientWidth - scaledW) / 2);
+    const offsetY = Math.max(0, (viewport.clientHeight - scaledH) / 2);
+    setPan({ x: Math.round(offsetX), y: Math.round(offsetY) });
+  }, [layout.height, layout.width]);
+
+  useEffect(() => {
+    if (view === "graph") {
+      fitGraphView();
+      const onResize = () => fitGraphView();
+      window.addEventListener("resize", onResize);
+      return () => window.removeEventListener("resize", onResize);
+    }
+  }, [fitGraphView, view]);
+
+  useEffect(() => {
+    const el = graphViewportRef.current;
+    if (!el || view !== "graph") return;
+    const onWheel = (e) => {
+      e.preventDefault();
+      const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
+      setScale((curr) => Math.min(2.0, Math.max(0.3, Math.round(curr * zoomFactor * 100) / 100)));
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, [view]);
+
   const resetView = () => {
-    setScale(1);
-    setPan({ x: 0, y: 0 });
+    fitGraphView();
   };
 
   const onPointerDown = (event) => {
@@ -430,11 +468,11 @@ export default function DependencyExplorer({
         </div>
         {view === "graph" && !empty ? (
           <div className="dependency-zoom-controls">
-            <button type="button" onClick={() => setScale((value) => Math.max(0.55, value - 0.1))} aria-label="Zoom out"><Minus size={13} /></button>
+            <button type="button" onClick={() => setScale((value) => Math.max(0.35, value - 0.1))} aria-label="Zoom out"><Minus size={13} /></button>
             <span>{Math.round(scale * 100)}%</span>
             <button type="button" onClick={() => setScale((value) => Math.min(1.8, value + 0.1))} aria-label="Zoom in"><Plus size={13} /></button>
             <button type="button" onClick={resetView} aria-label="Reset dependency view"><RotateCcw size={13} /></button>
-            <button type="button" className="dependency-fit-button" onClick={resetView} aria-label="Fit dependency view"><Maximize2 size={13} /><span>Fit graph</span></button>
+            <button type="button" className="dependency-fit-button" onClick={fitGraphView} aria-label="Fit dependency view"><Maximize2 size={13} /><span>Fit graph</span></button>
           </div>
         ) : null}
       </div>
@@ -452,6 +490,7 @@ export default function DependencyExplorer({
         />
       ) : (
         <div
+          ref={graphViewportRef}
           className={`dependency-graph-canvas ${dragging ? "dragging" : ""}`}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
@@ -464,7 +503,10 @@ export default function DependencyExplorer({
             preserveAspectRatio="xMidYMid meet"
             role="img"
             aria-label="Cryptographic dependency graph"
-            style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${scale})` }}
+            style={{
+              transform: `translate(${pan.x}px, ${pan.y}px) scale(${scale})`,
+              transformOrigin: "0 0",
+            }}
           >
             <defs>
               <marker id="dependency-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
