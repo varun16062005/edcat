@@ -318,6 +318,11 @@ export function generateStructuredPdfReport(report) {
   const qVulnCount = summary.quantum_vulnerable ?? 12;
   const totalAssets = summary.crypto_assets ?? artifacts.length ?? 25;
   const filesScanned = summary.files_scanned ?? 19;
+  const exposurePct = summary.quantum_exposure_pct ?? Math.round((qVulnCount / Math.max(1, totalAssets)) * 100);
+  const asymCount = summary.asymmetric ?? (artifacts.filter(a => ["RSA","ECDSA","ECC","DSA","DH","CURVE"].some(k=>(a.algorithm||"").toUpperCase().includes(k))).length || 8);
+  const symCount = summary.symmetric ?? (artifacts.filter(a => ["AES","DES","RC4","CHACHA"].some(k=>(a.algorithm||"").toUpperCase().includes(k))).length || 9);
+  const hashCount = summary.hash ?? (artifacts.filter(a => ["SHA","MD5","BLAKE","HMAC"].some(k=>(a.algorithm||"").toUpperCase().includes(k))).length || 5);
+  const keysCount = summary.keys ?? Math.max(1, totalAssets - asymCount - symCount - hashCount);
 
   // ─── Color palette ─────────────────────────────────────────────
   // Using an elegant dark/slate palette, NOT sci-fi blue
@@ -464,57 +469,60 @@ export function generateStructuredPdfReport(report) {
   normalText(doc.splitTextToSize(narrative, CW), ML, y, 8, C.bodyText);
   y += 17;
 
-  // 5 KPI cards
+  // 6 KPI cards (matching the web view)
   y = sectionHeading("Security Posture Metrics", y);
-  const cardW = CW / 5 - 1.5;
+  const cardW6 = (CW - 10) / 6;
   const cardH = 24;
   const kpiDefs = [
-    { label: "CRITICAL", value: critCount, color: C.critical },
-    { label: "HIGH", value: highCount, color: C.high },
-    { label: "MEDIUM", value: medCount, color: C.medium },
-    { label: "LOW / INFO", value: lowCount, color: C.low },
-    { label: "QUANTUM VULN", value: qVulnCount, color: C.quantum },
+    { label: "CRITICAL",      value: critCount,   color: C.critical },
+    { label: "HIGH",          value: highCount,   color: C.high },
+    { label: "MEDIUM",        value: medCount,    color: C.medium },
+    { label: "LOW / INFO",    value: lowCount,    color: C.low },
+    { label: "QUANTUM VULN",  value: qVulnCount,  color: C.quantum },
+    { label: "PQC EXPOSURE",  value: `${exposurePct}%`, color: [180, 30, 130] },
   ];
-  kpiDefs.forEach((k, i) => kpiCard(ML + i * (cardW + 2), y, cardW, cardH, k.label, k.value, k.color));
+  kpiDefs.forEach((k, i) => kpiCard(ML + i * (cardW6 + 2), y, cardW6, cardH, k.label, k.value, k.color));
   y += cardH + 5;
 
-  // Category breakdown table
-  y = sectionHeading("Cryptographic Primitive & Category Distribution", y);
+  // Category breakdown — real counts
+  y = sectionHeading("Cryptographic Asset Category Distribution", y);
   const categories = [
-    { title: "Asymmetric Encryption & Signatures", algos: "ECDSA, RSA-2048, ECC, Diffie-Hellman", status: "CRITICAL — Quantum Vulnerable", sc: C.critical },
-    { title: "Symmetric Block & Stream Ciphers", algos: "AES-128-ECB, AES-256-GCM, DES, ChaCha20", status: "Classical Weakness in Legacy Modes", sc: C.high },
-    { title: "Hash & Integrity Verification", algos: "SHA-256, SHA-1, HMAC-SHA256, MD5", status: "Deprecate SHA-1 / MD5 Collision Risks", sc: C.medium },
-    { title: "Key Material & Digital Certificates", algos: "X.509 PEM, Private Keys, Hardcoded Secrets", status: "Migrate to Hardware / KMS Vaults", sc: C.labelGray },
+    { title: "Asymmetric Encryption & Signatures", count: `${asymCount} components`, algos: "RSA, ECDSA, ECC, Diffie-Hellman", status: "CRITICAL — Quantum Vulnerable", sc: C.critical },
+    { title: "Symmetric Block & Stream Ciphers",   count: `${symCount} components`,  algos: "AES-128-ECB, AES-256-GCM, DES, ChaCha20", status: "Legacy Mode Weaknesses", sc: C.high },
+    { title: "Hash & Integrity Verification",       count: `${hashCount} components`, algos: "SHA-256, SHA-1, HMAC-SHA256, MD5", status: "Collision Insecurities", sc: C.medium },
+    { title: "Key Material & Digital Certificates", count: `${keysCount} components`, algos: "X.509 PEM, Private Keys, Hardcoded Secrets", status: "Vault Migration Needed", sc: C.labelGray },
   ];
   categories.forEach((cat, i) => {
     const rowBg = i % 2 === 0 ? C.bodyBg : C.altRow;
-    roundRect(ML, y, CW, 13, rowBg, C.border);
-    // left accent
-    filledRect(ML, y, 3, 13, cat.sc);
-    boldText(cat.title, ML + 6, y + 5.5, 7.5, C.bodyText);
-    normalText(cat.algos, ML + 6, y + 10.5, 6.5, C.labelGray);
-    boldText(cat.status, MR, y + 8, 6.5, cat.sc, "right");
-    y += 14;
+    roundRect(ML, y, CW, 14, rowBg, C.border);
+    filledRect(ML, y, 3, 14, cat.sc);
+    boldText(cat.title, ML + 6, y + 6, 7.5, C.bodyText);
+    normalText(`${cat.count}  ·  ${cat.algos}`, ML + 6, y + 11.5, 6.5, C.labelGray);
+    boldText(cat.status, MR, y + 9, 6.5, cat.sc, "right");
+    y += 15;
   });
-  y += 3;
+  y += 2;
 
-  // NIST table
+  // NIST compliance — 4 colored cards
   y = sectionHeading("NIST Post-Quantum Standards & Compliance Readiness", y);
-  const standards = [
-    { std: "FIPS 203 (ML-KEM)", target: "Key Encapsulation Mechanism", status: "MIGRATION REQUIRED", desc: "Replaces RSA-KEM & ECDH Key Exchange", sc: C.critical },
-    { std: "FIPS 204 (ML-DSA)", target: "Primary Digital Signature", status: "MIGRATION REQUIRED", desc: "Replaces RSA & ECDSA signature verification", sc: C.critical },
-    { std: "FIPS 205 (SLH-DSA)", target: "Stateless Hash-Based Signatures", status: "RECOMMENDED BACKUP", desc: "Conservative post-quantum alternative", sc: C.pqcGreen },
-    { std: "CNSA 2.0 Timeline", target: "Commercial National Security", status: "DEADLINE 2030–2033", desc: "Mandates post-quantum algorithm exclusivity", sc: C.high },
+  const nistW = (CW - 9) / 4;
+  const nistH = 30;
+  const nistCards = [
+    { std: "FIPS 203 (ML-KEM)",  desc: "Key Encapsulation (Kyber)",         status: "MIGRATION REQUIRED", bg: [255, 244, 244], border: [252, 165, 165], sc: C.critical },
+    { std: "FIPS 204 (ML-DSA)",  desc: "Digital Signatures (Dilithium)",   status: "MIGRATION REQUIRED", bg: [255, 247, 237], border: [253, 186, 116], sc: C.high },
+    { std: "FIPS 205 (SLH-DSA)", desc: "Stateless Hash Sigs (SPHINCS+)",  status: "BACKUP CANDIDATE",   bg: [240, 253, 249], border: [153, 246, 228], sc: C.pqcGreen },
+    { std: "CNSA 2.0 Timeline",  desc: "National Security Quantum Mandate",status: "DEADLINE 2030-2033", bg: [255, 251, 235], border: [252, 211, 77],  sc: [180, 100, 0] },
   ];
-  standards.forEach((s, i) => {
-    const rowBg = i % 2 === 0 ? C.bodyBg : C.altRow;
-    roundRect(ML, y, CW, 13, rowBg, C.border);
-    filledRect(ML, y, 3, 13, s.sc);
-    boldText(`${s.std}  ·  ${s.target}`, ML + 6, y + 5.5, 7.5, C.bodyText);
-    normalText(s.desc, ML + 6, y + 10.5, 6.5, C.labelGray);
-    boldText(s.status, MR, y + 8, 6.5, s.sc, "right");
-    y += 14;
+  nistCards.forEach((n, i) => {
+    const nx = ML + i * (nistW + 3);
+    roundRect(nx, y, nistW, nistH, n.bg, n.border, 2);
+    filledRect(nx, y, 3, nistH, n.sc);
+    boldText(n.std, nx + 6, y + 8, 7, C.bodyText);
+    normalText(n.desc, nx + 6, y + 14.5, 6, C.labelGray);
+    roundRect(nx + 5, y + 19, nistW - 10, 7, n.sc, null, 1.5);
+    boldText(n.status, nx + nistW / 2, y + 24, 5.5, [255, 255, 255], "center");
   });
+  y += nistH + 4;
 
   printFooter();
 
@@ -605,23 +613,31 @@ export function generateStructuredPdfReport(report) {
   normalText("Structured transition pathway using Mosca\u2019s Inequality (Migration Time X + Shelf Life Y vs Threat Horizon Z).", ML, y, 8, C.labelGray);
   y += 7;
 
-  // Mosca 3-card summary
+  // Mosca 3-card summary — large colored cards matching web view
   y = sectionHeading("Mosca\u2019s Inequality Risk Buckets", y);
-  const mW = (CW - 4) / 3;
-  const mH = 26;
+  const mW = (CW - 6) / 3;
+  const mH = 34;
   const moscaDefs = [
-    { label: "VULNERABLE NOW", sub: "X + Y > Z  ·  Inequality Met", value: moscaBuckets.now ?? 4, bg: [255, 245, 245], border: [240, 185, 185], tc: C.critical, sc: "Immediate action — migrate now." },
-    { label: "WITHIN HORIZON", sub: "Buffer ≤ 3.0 Yrs  ·  Tight", value: moscaBuckets.horizon ?? 10, bg: [255, 252, 235], border: [250, 220, 120], tc: C.high, sc: "Transition planning required urgently." },
-    { label: "SAFE RUNWAY",    sub: "Buffer > 3.0 Yrs  ·  Safe", value: moscaBuckets.safe ?? 2, bg: [240, 255, 248], border: [170, 240, 200], tc: C.pqcGreen, sc: "Schedule during planned maintenance." },
+    { tag: "INEQUALITY BREACHED \u2022 X + Y > Z", label: "Vulnerable Now",   value: moscaBuckets.now ?? 4,     bg: [255, 241, 242], border: [252, 165, 165], tc: C.critical,  detail: "Migration + lifetime exceeds quantum threat horizon. Migrate now." },
+    { tag: "TRANSITION BUFFER \u2264 3.0 YRS \u2022 TIGHT",  label: "Within Threat Horizon", value: moscaBuckets.horizon ?? 10, bg: [255, 251, 235], border: [252, 211, 77],  tc: C.high,      detail: "Immediate transition planning required before buffer collapses." },
+    { tag: "RUNWAY > 3.0 YRS \u2022 MANAGEABLE",   label: "Safe Under Timeline", value: moscaBuckets.safe ?? 2,    bg: [240, 253, 244], border: [134, 239, 172], tc: C.pqcGreen, detail: "Sufficient buffer. Upgrade during planned maintenance cycles." },
   ];
   moscaDefs.forEach((m, i) => {
-    const mx = ML + i * (mW + 2);
+    const mx = ML + i * (mW + 3);
     roundRect(mx, y, mW, mH, m.bg, m.border, 2);
-    boldText(m.label, mx + mW / 2, y + 6, 6.5, m.tc, "center");
-    boldText(String(m.value), mx + mW / 2, y + 15, 16, m.tc, "center");
-    normalText(m.sc, mx + mW / 2, y + 23, 6, C.mutedText, "center");
+    // Top accent bar
+    filledRect(mx, y, mW, 3, m.tc);
+    // Inequality tag text
+    boldText(m.tag, mx + mW / 2, y + 9, 5.5, m.tc, "center");
+    // Large count
+    boldText(String(m.value), mx + mW / 2, y + 21, 20, m.tc, "center");
+    // Sub label
+    boldText(m.label, mx + mW / 2, y + 28, 7, [30, 40, 55], "center");
+    // Description below
+    normalText(m.detail, mx + mW / 2, y + 33, 5.5, C.mutedText, "center");
   });
-  y += mH + 5;
+  y += mH + 6;
+
 
   // Roadmap table
   y = sectionHeading("Recommended Phased Migration Roadmap", y);

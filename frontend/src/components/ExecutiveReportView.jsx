@@ -274,6 +274,11 @@ export default function ExecutiveReportView({
           medium: mediumCount,
           low: lowCount,
           quantum_vulnerable: quantumVulnerableCount,
+          quantum_exposure_pct: quantumExposurePct,
+          asymmetric: asymmetricCount,
+          symmetric: symmetricCount,
+          hash: hashCount,
+          keys: keysCount,
         },
         canonicalRoot,
         txHash,
@@ -293,6 +298,7 @@ export default function ExecutiveReportView({
     } finally {
       setTimeout(() => setDownloading(false), 900);
     }
+
   };
 
   if (!isOpen) return null;

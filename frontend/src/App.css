@@ -15998,17 +15998,57 @@ body.modal-open-report {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 12px;
+  margin-bottom: 8px;
 }
 
 .report-compliance-card {
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  padding: 12px;
-  background: #ffffff;
+  border-radius: 8px;
+  padding: 14px 12px;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  position: relative;
+  overflow: hidden;
 }
+
+/* Colored left accent strip on every compliance card */
+.report-compliance-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+}
+
+/* FIPS 203 — MIGRATION REQUIRED — red */
+.report-compliance-card:nth-child(1) {
+  background: #fff5f5;
+  border: 1.5px solid #fca5a5;
+}
+.report-compliance-card:nth-child(1)::before { background: #dc2626; }
+.report-compliance-card:nth-child(1) .badge-req { background: #fee2e2; color: #b91c1c; }
+
+/* FIPS 204 — MIGRATION REQUIRED — orange */
+.report-compliance-card:nth-child(2) {
+  background: #fff8f1;
+  border: 1.5px solid #fed7aa;
+}
+.report-compliance-card:nth-child(2)::before { background: #ea580c; }
+.report-compliance-card:nth-child(2) .badge-req { background: #ffedd5; color: #c2410c; }
+
+/* FIPS 205 — BACKUP CANDIDATE — teal */
+.report-compliance-card:nth-child(3) {
+  background: #f0fdf9;
+  border: 1.5px solid #99f6e4;
+}
+.report-compliance-card:nth-child(3)::before { background: #0d9488; }
+
+/* CNSA 2.0 — DEADLINE — amber */
+.report-compliance-card:nth-child(4) {
+  background: #fffbeb;
+  border: 1.5px solid #fcd34d;
+}
+.report-compliance-card:nth-child(4)::before { background: #d97706; }
+
 
 .compliance-tag {
   font-size: 10px;
@@ -16101,58 +16141,161 @@ body.modal-open-report {
   line-height: 1.4;
 }
 
-/* Mosca Summary 3-Card Grid */
+/* Mosca Summary 3-Card Grid — fix class names to match JSX (card-now/horizon/safe) */
 .report-mosca-summary-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  gap: 14px;
+  margin-bottom: 16px;
 }
 
-.mosca-summary-card {
-  border-radius: 6px;
-  padding: 14px;
+/* Base mosca card */
+.report-mosca-card {
+  border-radius: 10px;
+  padding: 18px 16px 14px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
 }
 
-.card-mosca-now {
-  background: #fef2f2;
-  border: 1.5px solid #f87171;
+/* Card variant: NOW — critical red */
+.report-mosca-card.card-now {
+  background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%);
+  border: 2px solid #fca5a5;
 }
 
-.card-mosca-horizon {
-  background: #fffbeb;
-  border: 1.5px solid #fcd34d;
+/* Card variant: HORIZON — amber warning */
+.report-mosca-card.card-horizon {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 2px solid #fcd34d;
 }
 
-.card-mosca-safe {
-  background: #f0fdf4;
-  border: 1.5px solid #86efac;
+/* Card variant: SAFE — green */
+.report-mosca-card.card-safe {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 2px solid #86efac;
 }
 
-.mosca-card-label {
+/* Mosca tag (the INEQUALITY BREACHED / TRANSITION BUFFER labels) */
+.mosca-card-tag {
   font-size: 10px;
   font-weight: 800;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
+  display: block;
+  margin-bottom: 2px;
 }
 
-.card-mosca-now .mosca-card-label { color: #b91c1c; }
-.card-mosca-horizon .mosca-card-label { color: #a16207; }
-.card-mosca-safe .mosca-card-label { color: #15803d; }
+.card-now .mosca-card-tag,
+.tag-now { color: #b91c1c; }
 
-.mosca-card-val {
-  font-size: 20px;
+.card-horizon .mosca-card-tag,
+.tag-horizon { color: #92400e; }
+
+.card-safe .mosca-card-tag,
+.tag-safe { color: #14532d; }
+
+/* Big count number */
+.mosca-card-count {
+  font-size: 40px;
+  font-weight: 900;
+  line-height: 1;
+  display: block;
+  margin: 4px 0;
+}
+
+.card-now .mosca-card-count,
+.count-now { color: #dc2626; }
+
+.card-horizon .mosca-card-count,
+.count-horizon { color: #d97706; }
+
+.card-safe .mosca-card-count,
+.count-safe { color: #16a34a; }
+
+/* Heading text */
+.mosca-card-heading {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 2px;
+}
+
+/* Detail body text */
+.mosca-card-detail {
+  font-size: 11px;
+  color: #475569;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ── Compliance card child elements (comp-*) ─────────────── */
+.comp-title {
+  font-size: 12px;
   font-weight: 800;
-  color: #0f172a;
+  color: #1e293b;
+  padding-left: 6px;
 }
 
-.mosca-card-desc {
+.comp-desc {
   font-size: 11px;
   color: #475569;
   line-height: 1.4;
-  margin: 0;
+  padding-left: 6px;
+}
+
+/* Badge pills inside compliance cards */
+.comp-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  width: fit-content;
+  margin-top: 2px;
+  margin-left: 6px;
+  text-transform: uppercase;
+}
+
+/* MIGRATION REQUIRED — red */
+.comp-badge.badge-req {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+}
+
+/* BACKUP CANDIDATE — teal */
+.comp-badge.badge-opt {
+  background: #ccfbf1;
+  color: #0f766e;
+  border: 1px solid #99f6e4;
+}
+
+/* DEADLINE 2030-2033 — amber */
+.comp-badge.badge-warn {
+  background: #fef9c3;
+  color: #a16207;
+  border: 1px solid #fcd34d;
+}
+
+/* PQC target text in migration table */
+.pqc-target-text {
+  color: #059669;
+  font-weight: 700;
+}
+
+/* Effort badge */
+.badge-effort {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #f1f5f9;
+  color: #334155;
 }
 
 /* Badge Step Circle */
